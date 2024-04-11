@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "30009473935",
+    "project_id": "fir-zpo",
+    "storage_bucket": "fir-zpo.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:30009473935:android:122bb121e588cdf163e9fa",
+        "android_client_info": {
+          "package_name": "com.example.sr13"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC1evuiLEu6-RWdI8CIxXF1NBuy_slz7QM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
