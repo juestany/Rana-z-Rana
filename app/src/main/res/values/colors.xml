@@ -12,5 +12,7 @@
     <color name="gray_400">#FFBDBDBD</color>
     <color name="gray_600">#FF757575</color>
     <color name="base_color">#7E62F0</color>
+    <color name="colorSnackBarSuccess">#03A9F4</color>
+    <color name="colorSnackBarError">#EB1B63</color>
 
 </resources>

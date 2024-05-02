@@ -1,4 +1,18 @@
 <resources>
     <string name="app_name">Operacje</string>
+    <string name="login">Log in</string>
+    <string name="register">Register</string>
+    <string name="submit">Submit</string>
+    <string name="email">E-mail</string>
+    <string name="password">Password</string>
+    <string name="name">Name</string>
+    <string name="lastname">Last name</string>
+    <string name="repassword">Confirm password</string>
+    <string name="err_msg_enter_email">Please enter your email</string>
+    <string name="err_msg_enter_name">Please enter your name</string>
+    <string name="err_msg_enter_password">Please enter your password</string>
+    <string name="err_msg_enter_reppassword">Please confirm your password</string>
+    <string name="err_msg_password_mismatch">Passwords mismatch</string>
+    <string name="login_successfull">You are logged in successfully</string>
 
 </resources>
