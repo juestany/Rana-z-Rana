@@ -1,19 +1,19 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
-    // Apply the Google Services plugin
     id 'com.google.gms.google-services'
 }
 
 // Define the Kotlin version
-def kotlin_version = "1.6.10"
+def kotlin_version = "1.6.0"
 
 android {
-    compileSdkVersion 31
+    namespace = "com.example.sr13"
+    compileSdk = 34
     defaultConfig {
-        applicationId "com.example.ZPO-project"
-        minSdkVersion 19
-        targetSdkVersion 31 // Update to the latest target SDK version
+        applicationId "com.example.sr13"
+        minSdkVersion 24
+        targetSdkVersion 34
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -25,11 +25,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = '17'
     }
 }
 
