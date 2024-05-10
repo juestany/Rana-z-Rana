@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Operacje</string>
+    <string name="app_name">Raporty pooperacyjne</string>
     <string name="login">Log in</string>
     <string name="register">Register</string>
     <string name="submit">Submit</string>

@@ -9,7 +9,6 @@ import androidx.appcompat.app.AppCompatActivity
 import android.content.Intent
 import com.google.firebase.auth.FirebaseAuth
 
-class LoginActivity : AppCompatActivity() {
     class LoginActivity : BaseActivity(), View.OnClickListener {
         private var inputEmail: EditText? = null
         private var inputPassword: EditText? = null
@@ -69,4 +68,4 @@ class LoginActivity : AppCompatActivity() {
                     }
             }
         }
-    }}
+    }
