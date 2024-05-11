@@ -70,17 +70,15 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/loginPassword" />
 
-    <Button
+    <TextView
             android:text="Zarejestruj się"
-            android:layout_width="187dp"
-            android:layout_height="71dp"
-            android:id="@+id/registerUserButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onClick"
+            android:id="@+id/registerUserTextView"
+            android:layout_marginTop="20dp"
             app:layout_constraintTop_toBottomOf="@+id/loginButton"
-            android:layout_marginBottom="227dp"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintVertical_bias="0.0"
-            app:layout_constraintHorizontal_bias="0.513" />
+            app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

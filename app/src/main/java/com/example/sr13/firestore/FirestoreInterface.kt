@@ -1,4 +1,6 @@
-package com.example.sr13
+package com.example.sr13.firestore
+
+import com.example.sr13.Login
 
 /**
  * Interfejs FirestoreInterface definiuje operacje do interakcji z bazą danych Firestore.

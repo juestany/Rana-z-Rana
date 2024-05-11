@@ -30,7 +30,7 @@ class LoginActivity : BaseActivity(), View.OnClickListener {
         override fun onClick(view: View?) {
             if (view != null) {
                 when (view.id) {
-                    R.id.registerUserButton -> {
+                    R.id.registerUserTextView -> {
                         val intent = Intent(this, RegisterActivity::class.java)
                         startActivity(intent)
                     }
@@ -64,10 +64,24 @@ class LoginActivity : BaseActivity(), View.OnClickListener {
                         if (task.isSuccessful) {
                             showErrorSnackBar(resources.getString(R.string.login_successfull), false)
                             finish()
+                            goToBaseActivity()
                         } else {
                             showErrorSnackBar(task.exception!!.message.toString(), true)
                         }
                     }
             }
         }
+
+    /**
+     * Metoda przechodzenia do głównej aktywności po pomyślnym zalogowaniu i przekazanie uid do głównej aktywności.
+     */
+    open fun goToBaseActivity() {
+
+        val user = FirebaseAuth.getInstance().currentUser;
+        val uid = user?.email.toString()
+
+        val intent = Intent(this, BaseActivity::class.java)
+        intent.putExtra("uID",uid)
+        startActivity(intent)
     }
+}
