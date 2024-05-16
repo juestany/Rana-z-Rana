@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Raporty pooperacyjne</string>
+    <string name="app_name">Operacje</string>
     <string name="login">Log in</string>
     <string name="register">Register</string>
     <string name="submit">Submit</string>
@@ -14,5 +14,6 @@
     <string name="err_msg_enter_reppassword">Please confirm your password</string>
     <string name="err_msg_password_mismatch">Passwords mismatch</string>
     <string name="login_successfull">You are logged in successfully</string>
+    <string name="register_success">You have been successfully registered.\n</string>
 
 </resources>

@@ -5,11 +5,10 @@ import android.text.TextUtils
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
-import androidx.appcompat.app.AppCompatActivity
 import android.content.Intent
 import com.google.firebase.auth.FirebaseAuth
 
-    class LoginActivity : BaseActivity(), View.OnClickListener {
+class LoginActivity : BaseActivity(), View.OnClickListener {
         private var inputEmail: EditText? = null
         private var inputPassword: EditText? = null
         private var loginButton: Button? = null
@@ -17,18 +16,21 @@ import com.google.firebase.auth.FirebaseAuth
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
             setContentView(R.layout.login)
+
             inputEmail = findViewById(R.id.loginEmail)
             inputPassword = findViewById(R.id.loginPassword)
-            loginButton = findViewById(R.id.loginBtn)
+            loginButton = findViewById(R.id.loginButton)
+
             loginButton?.setOnClickListener {
                 logInRegisteredUser()
             }
         }
 
+
         override fun onClick(view: View?) {
             if (view != null) {
                 when (view.id) {
-                    R.id.loginBtn -> {
+                    R.id.registerUserTextView -> {
                         val intent = Intent(this, RegisterActivity::class.java)
                         startActivity(intent)
                     }
@@ -62,10 +64,24 @@ import com.google.firebase.auth.FirebaseAuth
                         if (task.isSuccessful) {
                             showErrorSnackBar(resources.getString(R.string.login_successfull), false)
                             finish()
+                            goToBaseActivity()
                         } else {
                             showErrorSnackBar(task.exception!!.message.toString(), true)
                         }
                     }
             }
         }
+
+    /**
+     * Metoda przechodzenia do głównej aktywności po pomyślnym zalogowaniu i przekazanie uid do głównej aktywności.
+     */
+    open fun goToBaseActivity() {
+
+        val user = FirebaseAuth.getInstance().currentUser;
+        val uid = user?.email.toString()
+
+        val intent = Intent(this, BaseActivity::class.java)
+        intent.putExtra("uID",uid)
+        startActivity(intent)
     }
+}
