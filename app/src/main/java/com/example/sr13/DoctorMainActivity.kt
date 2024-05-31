@@ -6,6 +6,8 @@ import androidx.recyclerview.widget.RecyclerView
 import android.widget.Button
 import android.widget.TextView
 import androidx.constraintlayout.utils.widget.ImageFilterView
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class DoctorMainActivity : AppCompatActivity() {
 
@@ -14,10 +16,16 @@ class DoctorMainActivity : AppCompatActivity() {
     private lateinit var patientProfilePicMain: ImageFilterView
     private lateinit var patientSubmitReportBtn: Button
     private lateinit var patientSubmittedReportsRecyclerView: RecyclerView
+    private lateinit var auth: FirebaseAuth
+    private lateinit var firestore: FirebaseFirestore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.doctor_main)
+
+        // Initialize Firebase components
+        auth = FirebaseAuth.getInstance()
+        firestore = FirebaseFirestore.getInstance()
 
         // Initialize views
         patientNameMain = findViewById(R.id.patientNameMain)
@@ -27,9 +35,7 @@ class DoctorMainActivity : AppCompatActivity() {
         patientSubmittedReportsRecyclerView = findViewById(R.id.patientSubmittedReportsRecyclerView)
 
         // Set up initial values or listeners here
-        // For example, set the text for the patient name and role
-        patientNameMain.text = "Jan Kowalski" // You might set this from a data source
-        patientRoleMain.text = "Chirurg ogólny" // You might set this from a data source
+        getDoctorData()
 
         // Set a click listener for the button
         patientSubmitReportBtn.setOnClickListener {
@@ -40,5 +46,37 @@ class DoctorMainActivity : AppCompatActivity() {
         // Set up RecyclerView adapter, layout manager, etc.
         // patientSubmittedReportsRecyclerView.layoutManager = LinearLayoutManager(this)
         // patientSubmittedReportsRecyclerView.adapter = YourAdapter()
+    }
+
+    private fun getDoctorData() {
+        val user = FirebaseAuth.getInstance().currentUser
+        val userId = auth.currentUser?.uid
+
+        userId?.let { uid ->
+            firestore.collection("doctor")
+                .document(uid)
+                .get()
+                .addOnSuccessListener { document ->
+                    if (document != null) {
+                        val firstName = document.getString("firstName")
+                        val lastName = document.getString("lastName")
+                        val title = document.getString("title")
+                        val address = document.getString("address")
+                        val phoneNumber = document.getString("phoneNumber")
+
+                        patientNameMain.text = "$firstName $lastName"
+                        patientRoleMain.text = title
+                        // Set other views with additional doctor data
+                        // For example:
+                        // patientAddressTextView.text = address
+                        // patientPhoneNumberTextView.text = phoneNumber
+                    } else {
+                        // Document doesn't exist
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    // Handle failures
+                }
+        }
     }
 }
