@@ -6,7 +6,7 @@ import com.google.firebase.firestore.ktx.toObject
 import kotlinx.coroutines.tasks.await
 
 /**
- * Klasa FirestoreDatabaseOperations implementuje interfejs FirestoreInterface
+ * Klasa LoginFirestoreDatabaseOperations implementuje interfejs LoginFirestoreInterface
  * i zawiera metody do dodawania, pobierania, aktualizowania i usuwania danych logowania
  * w bazie danych Firestore.
  *

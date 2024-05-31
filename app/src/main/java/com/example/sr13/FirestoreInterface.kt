@@ -1,7 +1,7 @@
 package com.example.sr13
 
 /**
- * Interfejs FirestoreInterface definiuje operacje do interakcji z bazą danych Firestore.
+ * Interfejs LoginFirestoreInterface definiuje operacje do interakcji z bazą danych Firestore.
  * Wszystkie operacje są oznaczone jako 'suspend', co oznacza, że mogą być wywoływane
  * tylko w kontekście korutyny.
  */

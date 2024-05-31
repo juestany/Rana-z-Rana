@@ -7,8 +7,8 @@ import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
-import com.example.sr13.firestore.FirestoreDatabaseOperations
-import com.example.sr13.firestore.User
+import com.example.sr13.firestore.Doctor
+import com.example.sr13.firestore.DoctorFirestoreDatabaseOperations
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
@@ -18,7 +18,11 @@ class RegisterActivity : BaseActivity() {
 
     private var registerButton: Button? = null
     private var inputEmail: EditText? = null
-    private var inputName: EditText? = null
+    private var inputFirstName: EditText? = null
+    private var inputLastName: EditText? = null
+    private var inputPhoneNumber: EditText? = null
+    private var inputAddress: EditText? = null
+    private var inputTitle: EditText? = null
     private var inputPassword: EditText? = null
     private var inputRepPass: EditText? = null
 
@@ -26,44 +30,63 @@ class RegisterActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.register)
 
-        // Inicjalizacja pól wejściowych i przycisku rejestracji
+
         registerButton = findViewById(R.id.registerButton)
         inputEmail = findViewById(R.id.registerEmail)
-        inputName = findViewById(R.id.registerName)
+        inputFirstName = findViewById(R.id.registerFirstName)
+        inputLastName = findViewById(R.id.registerLastName)
+        inputPhoneNumber = findViewById(R.id.registerPhoneNumber)
+        inputAddress = findViewById(R.id.registerAddress)
+        inputTitle = findViewById(R.id.registerTitle)
         inputPassword = findViewById(R.id.registerPassword)
         inputRepPass = findViewById(R.id.registerPassword2Repeat)
 
-        // Ustawienie nasłuchiwania kliknięć przycisku rejestracji
-        registerButton?.setOnClickListener{
-            registerUser()
+
+        registerButton?.setOnClickListener {
+            registerDoctor()
         }
     }
 
     /**
-     * Metoda walidująca wprowadzone dane rejestracji.
-     * @return True, jeśli dane są poprawne, w przeciwnym razie False.
+     * Method to validate registration details.
+     * @return True if the details are valid, False otherwise.
      */
     private fun validateRegisterDetails(): Boolean {
-
-        return when{
-            TextUtils.isEmpty(inputEmail?.text.toString().trim{ it <= ' '}) -> {
-                showErrorSnackBar(resources.getString(R.string.err_msg_enter_email),true)
+        return when {
+            TextUtils.isEmpty(inputEmail?.text.toString().trim { it <= ' ' }) -> {
+                showErrorSnackBar("Wprowadź adres e-mail.", true)
                 false
             }
-            TextUtils.isEmpty(inputName?.text.toString().trim{ it <= ' '}) -> {
-                showErrorSnackBar(resources.getString(R.string.err_msg_enter_name),true)
+            TextUtils.isEmpty(inputFirstName?.text.toString().trim { it <= ' ' }) -> {
+                showErrorSnackBar("Wprowadź imię.", true)
                 false
             }
-            TextUtils.isEmpty(inputPassword?.text.toString().trim{ it <= ' '}) -> {
-                showErrorSnackBar(resources.getString(R.string.err_msg_enter_password),true)
+            TextUtils.isEmpty(inputLastName?.text.toString().trim { it <= ' ' }) -> {
+                showErrorSnackBar("Wprowadź nazwisko.", true)
                 false
             }
-            TextUtils.isEmpty(inputRepPass?.text.toString().trim{ it <= ' '}) -> {
-                showErrorSnackBar(resources.getString(R.string.err_msg_enter_reppassword),true)
+            TextUtils.isEmpty(inputPhoneNumber?.text.toString().trim { it <= ' ' }) -> {
+                showErrorSnackBar("Wprowadź numer telefonu.", true)
                 false
             }
-            inputPassword?.text.toString().trim {it <= ' '} != inputRepPass?.text.toString().trim{it <= ' '} -> {
-                showErrorSnackBar(resources.getString(R.string.err_msg_password_mismatch),true)
+            TextUtils.isEmpty(inputAddress?.text.toString().trim { it <= ' ' }) -> {
+                showErrorSnackBar("Wprowadź adres.", true)
+                false
+            }
+            TextUtils.isEmpty(inputTitle?.text.toString().trim { it <= ' ' }) -> {
+                showErrorSnackBar("Wprowadź tytuł.", true)
+                false
+            }
+            TextUtils.isEmpty(inputPassword?.text.toString().trim { it <= ' ' }) -> {
+                showErrorSnackBar("Wprowadź hasło.", true)
+                false
+            }
+            TextUtils.isEmpty(inputRepPass?.text.toString().trim { it <= ' ' }) -> {
+                showErrorSnackBar("Powtórz hasło.", true)
+                false
+            }
+            inputPassword?.text.toString().trim { it <= ' ' } != inputRepPass?.text.toString().trim { it <= ' ' } -> {
+                showErrorSnackBar("Hasła muszą być takie same.", true)
                 false
             }
             else -> true
@@ -71,51 +94,44 @@ class RegisterActivity : BaseActivity() {
     }
 
     /**
-     * Metoda przechodzenia do aktywności logowania.
+     * Method to register a new doctor.
      */
-    fun goToLogin(view: View) {
-        val intent = Intent(this, LoginActivity::class.java)
-        startActivity(intent)
-        finish() // finish(), po to aby użytkownik nie mógł już wrócić do aktualnej aktywności bez restartowania aplikacji
-    }
+    private fun registerDoctor() {
+        if (validateRegisterDetails()) {
+            showProgressDialog("Proszę czekać...")
 
-    /**
-     * Metoda rejestracji użytkownika za pomocą Firebase Authentication.
-     */
-    private fun registerUser(){
-        if (validateRegisterDetails()){
-            val login: String = inputEmail?.text.toString().trim() {it <= ' '}
-            val password: String = inputPassword?.text.toString().trim() {it <= ' '}
-            val name: String = inputName?.text.toString().trim() {it <= ' '}
+            val email: String = inputEmail?.text.toString().trim { it <= ' ' }
+            val password: String = inputPassword?.text.toString().trim { it <= ' ' }
 
-            FirebaseAuth.getInstance().createUserWithEmailAndPassword(login,password).addOnCompleteListener(
-                OnCompleteListener <AuthResult>{ task ->
-                    if(task.isSuccessful){
-                        val firebaseUser: FirebaseUser = task.result!!.user!!
-                        showErrorSnackBar("You are registered successfully. Your user id is ${firebaseUser.uid}",false)
+            FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(
+                    OnCompleteListener<AuthResult> { task ->
 
-                        val user = User("Testowe ID",
-                            name,
-                            true,
-                            login,
-                        )
-                        FirestoreDatabaseOperations().registerUserFS(this@RegisterActivity, user)
+                        if (task.isSuccessful) {
+                            val firebaseUser: FirebaseUser = task.result!!.user!!
 
-                        FirebaseAuth.getInstance().signOut()
-                        finish()
+                            val doctor = Doctor(
+                                firebaseUser.uid,
+                                inputFirstName?.text.toString().trim { it <= ' ' },
+                                inputLastName?.text.toString().trim { it <= ' ' },
+                                inputPhoneNumber?.text.toString().trim { it <= ' ' },
+                                inputAddress?.text.toString().trim { it <= ' ' },
+                                inputTitle?.text.toString().trim { it <= ' ' }
+                            )
 
-                    } else{
-                        showErrorSnackBar(task.exception!!.message.toString(),true)
-                    }
-                }
-            )
+                            DoctorFirestoreDatabaseOperations().registerDoctor(this, doctor)
+                        } else {
+                            hideProgressDialog()
+                            showErrorSnackBar(task.exception!!.message.toString(), true)
+                        }
+                    })
         }
     }
 
     /**
-     * Metoda wywoływana po udanej rejestracji użytkownika wyświetlająca wiadomość Toast.
+     * Method called after successful registration.
      */
-    fun  userRegistrationSuccess(){
-        Toast.makeText(this@RegisterActivity, resources.getString(R.string.register_success), Toast.LENGTH_LONG).show()
+    fun userRegistrationSuccess() {
+        Toast.makeText(this@RegisterActivity, "Rejestracja zakończona sukcesem.", Toast.LENGTH_LONG).show()
     }
 }

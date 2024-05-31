@@ -8,13 +8,13 @@ import com.google.firebase.firestore.ktx.toObject
 import kotlinx.coroutines.tasks.await
 
 /**
- * Klasa FirestoreDatabaseOperations implementuje interfejs FirestoreInterface
+ * Klasa LoginFirestoreDatabaseOperations implementuje interfejs LoginFirestoreInterface
  * i zawiera metody do dodawania, pobierania, aktualizowania i usuwania danych logowania
  * w bazie danych Firestore.
  *
  * @property db - Referencja do obiektu FirebaseFirestore, służąca do interakcji z bazą danych Firestore.
  */
-class FirestoreDatabaseOperations() : FirestoreInterface {
+class LoginFirestoreDatabaseOperations() : LoginFirestoreInterface {
 
     private val mFireStore = FirebaseFirestore.getInstance()
     /**
@@ -25,9 +25,9 @@ class FirestoreDatabaseOperations() : FirestoreInterface {
      * @param login Obiekt klasy Login, który ma zostać dodany do bazy danych.
      */
 
-    fun registerUserFS(activity: RegisterActivity, userInfo: User){
+    fun registerUserFS(activity: RegisterActivity, userInfo: Doctor){
 
-        mFireStore.collection("users")
+        mFireStore.collection("doctor")
             .document(userInfo.id)
             .set(userInfo, SetOptions.merge())
             .addOnSuccessListener {
@@ -41,7 +41,7 @@ class FirestoreDatabaseOperations() : FirestoreInterface {
 
     override suspend fun addLogin(email: String, login: Login) {
         try {
-            mFireStore.collection("logins").document(email).set(login).await()
+            mFireStore.collection("login").document(email).set(login).await()
         } catch (e: Exception) {
             // Obsługa błędów
         }
@@ -56,7 +56,7 @@ class FirestoreDatabaseOperations() : FirestoreInterface {
      * lub null, jeśli nie istnieje użytkownik o podanym adresie email.
      */
     override suspend fun getLoginByEmail(email: String): Login? {
-        val snapshot = mFireStore.collection("logins")
+        val snapshot = mFireStore.collection("login")
             .whereEqualTo(FieldPath.documentId(), email)
             .get()
             .await()
@@ -73,7 +73,7 @@ class FirestoreDatabaseOperations() : FirestoreInterface {
      */
     override suspend fun updateLogin(email: String, updatedLogin: Login) {
         try {
-            mFireStore.collection("logins").document(email).set(updatedLogin).await()
+            mFireStore.collection("login").document(email).set(updatedLogin).await()
         } catch (e: Exception) {
             // Obsługa błędów
         }
@@ -87,7 +87,7 @@ class FirestoreDatabaseOperations() : FirestoreInterface {
      */
     override suspend fun deleteLogin(email: String) {
         try {
-            mFireStore.collection("logins").document(email).delete().await()
+            mFireStore.collection("login").document(email).delete().await()
         } catch (e: Exception) {
             // Obsługa błędów
         }
