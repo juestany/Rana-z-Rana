@@ -15,5 +15,5 @@ import com.google.firebase.firestore.PropertyName
 data class Login(
     @get:PropertyName("email") @set:PropertyName("email") var email: String = "",
     @get:PropertyName("password") @set:PropertyName("password") var password: String = "",
-    @get:PropertyName("role") @set:PropertyName("role") var role: String = "pacjent"
+    @get:PropertyName("role") @set:PropertyName("role") var role: String = ""
 )

@@ -1,17 +1,21 @@
 package com.example.sr13
 
+import android.content.Intent
 import android.os.Bundle
 import android.text.TextUtils
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
-import android.content.Intent
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class LoginActivity : BaseActivity(), View.OnClickListener {
     private var inputEmail: EditText? = null
     private var inputPassword: EditText? = null
     private var loginButton: Button? = null
+    private lateinit var firestore: FirebaseFirestore
+    private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -20,12 +24,12 @@ class LoginActivity : BaseActivity(), View.OnClickListener {
         inputEmail = findViewById(R.id.loginEmail)
         inputPassword = findViewById(R.id.loginPassword)
         loginButton = findViewById(R.id.loginButton)
-
+        firestore = FirebaseFirestore.getInstance()
+        auth = FirebaseAuth.getInstance() // Dodano inicjalizację zmiennej auth
         loginButton?.setOnClickListener {
             logInRegisteredUser()
         }
     }
-
 
     override fun onClick(view: View?) {
         if (view != null) {
@@ -62,9 +66,8 @@ class LoginActivity : BaseActivity(), View.OnClickListener {
             FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        showErrorSnackBar(resources.getString(R.string.login_successful), false)
-                        finish()
-                        goToBaseActivity()
+                        Log.d(TAG, "User logged in successfully")
+                        goToNextActivity()
                     } else {
                         showErrorSnackBar(task.exception!!.message.toString(), true)
                     }
@@ -72,16 +75,44 @@ class LoginActivity : BaseActivity(), View.OnClickListener {
         }
     }
 
-    /**
-     * Metoda przechodzenia do głównej aktywności po pomyślnym zalogowaniu i przekazanie uid do głównej aktywności.
-     */
-    open fun goToBaseActivity() {
-
-        val user = FirebaseAuth.getInstance().currentUser;
+    private fun goToNextActivity() {
+        val user = FirebaseAuth.getInstance().currentUser
         val uid = user?.email.toString()
+        val userId = auth.currentUser?.uid
 
-        val intent = Intent(this, BaseActivity::class.java)
-        intent.putExtra("uID",uid)
-        startActivity(intent)
+        userId?.let { uid ->
+            firestore.collection("login")
+                .document(uid)
+                .get()
+                .addOnSuccessListener { appUserDocument ->
+                    val role = appUserDocument.getString("role")
+
+                    when (role) {
+                        "lekarz" -> {
+                            val intent = Intent(this, DoctorMainActivity::class.java)
+                            intent.putExtra("uID", uid)
+                            startActivity(intent)
+                            finish()
+                        }
+                        "pacjent" -> {
+                            val intent = Intent(this, PatientMainActivity::class.java)
+                            intent.putExtra("uID", uid)
+                            startActivity(intent)
+                            finish()
+                        }
+                        else -> {
+                            showErrorSnackBar("Unknown role", true)
+                        }
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Log.e(TAG, "Error getting document", e)
+                    showErrorSnackBar(e.message.toString(), true)
+                }
+        }
+    }
+
+    companion object {
+        private const val TAG = "LoginActivity"
     }
 }

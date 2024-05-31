@@ -38,6 +38,16 @@
                     android:name="android.app.lib_name"
                     android:value="" />
         </activity>
+        <activity
+                android:name=".DoctorMainActivity"
+                android:exported="true">
+            <!-- Możesz dodać ewentualne metadane -->
+        </activity>
+        <activity
+                android:name=".PatientMainActivity"
+                android:exported="true">
+            <!-- Możesz dodać ewentualne metadane -->
+        </activity>
     </application>
 
 </manifest>

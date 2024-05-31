@@ -7,7 +7,7 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.constraintlayout.utils.widget.ImageFilterView
 
-class DoctorActivity : AppCompatActivity() {
+class PatientMainActivity : AppCompatActivity() {
 
     private lateinit var patientNameMain: TextView
     private lateinit var patientRoleMain: TextView
@@ -17,7 +17,7 @@ class DoctorActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.doctor_main)
+        setContentView(R.layout.patient_main)
 
         // Initialize views
         patientNameMain = findViewById(R.id.patientNameMain)
@@ -28,8 +28,8 @@ class DoctorActivity : AppCompatActivity() {
 
         // Set up initial values or listeners here
         // For example, set the text for the patient name and role
-        patientNameMain.text = "Jan Kowalski" // You might set this from a data source
-        patientRoleMain.text = "Chirurg ogólny" // You might set this from a data source
+        patientNameMain.text = "Leokadia Rafałowicz" // You might set this from a data source
+        patientRoleMain.text = "Pacjent" // You might set this from a data source
 
         // Set a click listener for the button
         patientSubmitReportBtn.setOnClickListener {
