@@ -23,8 +23,16 @@ class DoctorAddPatientActivity : AppCompatActivity() {
         setContentView(R.layout.doctor_add_patient)
 
         addPatientBtn = findViewById(R.id.addPatientBtn)
+        addPatientName = findViewById(R.id.addPatientName)
+        addPatientLastName = findViewById(R.id.addPatientLastName)
+        addPatientPESEL = findViewById(R.id.addPatientPESEL)
+        addPatientEmail = findViewById(R.id.addPatientEmail)
+        addPatientNumber = findViewById(R.id.addPatientNumber)
+        addPatientAddress = findViewById(R.id.addPatientAddress)
+        addPatientDate = findViewById(R.id.addPatientDate)
 
         addPatientBtn.setOnClickListener() {
+            // TODO: add patient to database
             val intent = Intent(this@DoctorAddPatientActivity, DoctorMyPatientsActivity::class.java)
             startActivity(intent)
         }

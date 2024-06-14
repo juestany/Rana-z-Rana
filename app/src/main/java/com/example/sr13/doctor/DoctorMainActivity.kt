@@ -1,5 +1,6 @@
 package com.example.sr13.doctor
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
@@ -17,7 +18,6 @@ class DoctorMainActivity : AppCompatActivity() {
     private lateinit var doctorNameMain: TextView
     private lateinit var doctorRoleMain: TextView
     private lateinit var doctorProfilePicMain: ImageFilterView
-    private lateinit var doctorSubmitReportBtn: Button
     private lateinit var doctorSubmittedReportsRecyclerView: RecyclerView
     private lateinit var myPatientsBtn: Button
     private lateinit var auth: FirebaseAuth
@@ -36,9 +36,16 @@ class DoctorMainActivity : AppCompatActivity() {
         doctorRoleMain = findViewById(R.id.doctorRoleMain)
         doctorProfilePicMain = findViewById(R.id.doctorProfilePicMain)
         doctorSubmittedReportsRecyclerView = findViewById(R.id.doctorTodaySubmittedReportsRecyclerView)
+        myPatientsBtn = findViewById(R.id.myPatientsBtn)
 
         // Set up initial values or listeners here
         getDoctorData()
+
+        myPatientsBtn.setOnClickListener() {
+            val intent = Intent(this@DoctorMainActivity, DoctorMyPatientsActivity::class.java)
+            startActivity(intent)
+        }
+
     }
 
     private fun getDoctorData() {

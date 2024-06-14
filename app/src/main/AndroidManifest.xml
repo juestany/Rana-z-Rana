@@ -60,6 +60,10 @@
                 android:exported="true">
         </activity>
         <activity
+                android:name=".doctor.DoctorAddPatientActivity"
+                android:exported="true">
+        </activity>
+        <activity
                 android:name=".patient.PatientMainActivity"
                 android:exported="true">
             <!-- Możesz dodać ewentualne metadane -->

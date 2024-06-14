@@ -40,7 +40,7 @@ class PatientAddReportActivity : AppCompatActivity(){
         }
 
         // Wait for submit button
-        val patientSubmitReportBtn = findViewById<Button>(R.id.patientSubmitReportBtn)
+        val patientSubmitReportBtn = findViewById<Button>(R.id.myPatientsBtn)
         patientSubmitReportBtn.setOnClickListener {
             // TODO: save everything to database in a report. fetch patient's comment
             val intent = Intent(this, PatientMainActivity::class.java)

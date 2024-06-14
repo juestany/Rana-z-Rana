@@ -7,7 +7,7 @@
 
 
     <TextView
-        android:id="@+id/patientNameMain"
+        android:id="@+id/doctorNameMain"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="56dp"
@@ -18,24 +18,24 @@
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toEndOf="@+id/patientProfilePicMain"
-        app:layout_constraintTop_toTopOf="@+id/patientProfilePicMain" />
+        app:layout_constraintStart_toEndOf="@+id/doctorProfilePicMain"
+        app:layout_constraintTop_toTopOf="@+id/doctorProfilePicMain" />
 
     <TextView
-        android:id="@+id/patientRoleMain"
+        android:id="@+id/doctorRoleMain"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="196dp"
         android:layout_marginBottom="112dp"
         android:text="Pacjent"
         android:textColor="#000000"
-        app:layout_constraintBottom_toBottomOf="@+id/patientProfilePicMain"
+        app:layout_constraintBottom_toBottomOf="@+id/doctorProfilePicMain"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/patientProfilePicMain" />
+        app:layout_constraintStart_toEndOf="@+id/doctorProfilePicMain" />
 
 
     <androidx.constraintlayout.utils.widget.ImageFilterView
-        android:id="@+id/patientProfilePicMain"
+        android:id="@+id/doctorProfilePicMain"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="44dp"
@@ -43,7 +43,7 @@
         android:layout_marginEnd="20dp"
         android:layout_marginBottom="35dp"
         app:layout_constraintBottom_toTopOf="@+id/patientSubmittedReportsRecyclerView"
-        app:layout_constraintEnd_toStartOf="@+id/patientRoleMain"
+        app:layout_constraintEnd_toStartOf="@+id/doctorRoleMain"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0"

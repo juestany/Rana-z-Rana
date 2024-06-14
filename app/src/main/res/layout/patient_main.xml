@@ -7,7 +7,7 @@
 
 
     <TextView
-        android:id="@+id/patientNameMain"
+        android:id="@+id/doctorNameMain"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="28dp"
@@ -18,37 +18,37 @@
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toEndOf="@+id/patientProfilePicMain"
-        app:layout_constraintTop_toTopOf="@+id/patientProfilePicMain" />
+        app:layout_constraintStart_toEndOf="@+id/doctorProfilePicMain"
+        app:layout_constraintTop_toTopOf="@+id/doctorProfilePicMain" />
 
     <TextView
-        android:id="@+id/patientRoleMain"
+        android:id="@+id/doctorRoleMain"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="196dp"
         android:layout_marginBottom="24dp"
         android:text="Pacjent"
         android:textColor="#000000"
-        app:layout_constraintBottom_toBottomOf="@+id/patientProfilePicMain"
+        app:layout_constraintBottom_toBottomOf="@+id/doctorProfilePicMain"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/patientProfilePicMain" />
+        app:layout_constraintStart_toEndOf="@+id/doctorProfilePicMain" />
 
     <androidx.constraintlayout.utils.widget.ImageFilterView
-        android:id="@+id/patientProfilePicMain"
+        android:id="@+id/doctorProfilePicMain"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="44dp"
         android:layout_marginTop="50dp"
         android:layout_marginEnd="20dp"
         android:layout_marginBottom="35dp"
-        app:layout_constraintBottom_toTopOf="@+id/patientSubmitReportBtn"
-        app:layout_constraintEnd_toStartOf="@+id/patientRoleMain"
+        app:layout_constraintBottom_toTopOf="@+id/myPatientsBtn"
+        app:layout_constraintEnd_toStartOf="@+id/doctorRoleMain"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:src="@tools:sample/avatars" />
 
     <Button
-        android:id="@+id/patientSubmitReportBtn"
+        android:id="@+id/myPatientsBtn"
         android:layout_width="343dp"
         android:layout_height="56dp"
         android:layout_marginStart="34dp"
@@ -59,7 +59,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/patientProfilePicMain" />
+        app:layout_constraintTop_toBottomOf="@+id/doctorProfilePicMain" />
 
     <TextView
         android:id="@+id/textView16"
