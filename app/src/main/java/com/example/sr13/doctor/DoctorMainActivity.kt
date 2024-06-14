@@ -32,9 +32,9 @@ class DoctorMainActivity : AppCompatActivity() {
         firestore = FirebaseFirestore.getInstance()
 
         // Initialize views
-        doctorNameMain = findViewById(R.id.doctorNameMain)
+        doctorNameMain = findViewById(R.id.patientNameMain)
         doctorRoleMain = findViewById(R.id.doctorRoleMain)
-        doctorProfilePicMain = findViewById(R.id.doctorProfilePicMain)
+        doctorProfilePicMain = findViewById(R.id.patientProfilePicMain)
         doctorSubmittedReportsRecyclerView = findViewById(R.id.doctorTodaySubmittedReportsRecyclerView)
         myPatientsBtn = findViewById(R.id.myPatientsBtn)
 
