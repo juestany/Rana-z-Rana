@@ -1,13 +1,13 @@
 package com.example.sr13.doctor
 
-import CustomAdapter
+import com.example.sr13.doctor.my_patients_recyclerview.MyPatientsAdapter
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.sr13.MyPatientsViewModel
+import com.example.sr13.doctor.my_patients_recyclerview.MyPatientsViewModel
 import com.example.sr13.R
 
 class DoctorMyPatientsActivity : AppCompatActivity() {
@@ -23,26 +23,31 @@ class DoctorMyPatientsActivity : AppCompatActivity() {
         val recyclerview = findViewById<RecyclerView>(R.id.myPatientsRecyclerView)
         // this creates a vertical layout Manager
         recyclerview.layoutManager = LinearLayoutManager(this)
+
+        // Mock data for patients' names
+        val patientsNames = listOf(
+            // TODO: get from database
+            "Julia Nowak", "Grzegorz Małysz", "Leokadia Rafałowicz",
+            "Krzysztof Kowalski", "Anna Dąbrowska", "Michał Wiśniewski"
+        )
+
         // ArrayList of class ItemsViewModel
         val data = ArrayList<MyPatientsViewModel>()
 
-        // This loop will create 20 Views containing
-        // the image with the count of view
-        for (i in 1..20) {
-            data.add(MyPatientsViewModel(R.drawable.ic_profile_icon, "Item " + i))
+        // Populate the data with mock patient names
+        for (name in patientsNames) {
+            data.add(MyPatientsViewModel(R.drawable.ic_profile_icon, name))
         }
 
         // This will pass the ArrayList to our Adapter
-        val adapter = CustomAdapter(data)
+        val adapter = MyPatientsAdapter(data)
 
         // Setting the Adapter with the recyclerview
         recyclerview.adapter = adapter
 
-        addPatientBtn.setOnClickListener() {
+        addPatientBtn.setOnClickListener {
             val intent = Intent(this@DoctorMyPatientsActivity, DoctorAddPatientActivity::class.java)
             startActivity(intent)
         }
     }
-
-    // TODO: Recycler View with patients from the database
 }
