@@ -1,5 +1,6 @@
 package com.example.sr13.patient
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
@@ -40,8 +41,9 @@ class PatientMainActivity : AppCompatActivity() {
 
         // Set a click listener for the button
         patientSubmitReportBtn.setOnClickListener {
-            // Handle button click
-            // For example, start a new activity or show a message
+            val intent = Intent(this@PatientMainActivity, PatientAddReport::class.java)
+            startActivity(intent)
+
         }
 
         // Set up RecyclerView adapter, layout manager, etc.
