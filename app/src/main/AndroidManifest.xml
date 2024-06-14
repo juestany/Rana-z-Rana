@@ -52,6 +52,10 @@
             <!-- Możesz dodać ewentualne metadane -->
         </activity>
         <activity
+                android:name=".patient.PatientAddReport"
+                android:exported="true">
+        </activity>
+        <activity
                 android:name=".patient.PatientMainActivity"
                 android:exported="true">
             <!-- Możesz dodać ewentualne metadane -->

@@ -30,12 +30,14 @@ class PatientAddReport : AppCompatActivity(){
         // TODO: update the name of the operation
         //findViewById<TextView>(R.id.patientOperationDesc).text =
 
+        previewImage = findViewById(R.id.previewImage)
+
         // Wait for adding an image
         val uploadImageBtn = findViewById<Button>(R.id.uploadImageBtn)
         uploadImageBtn.setOnClickListener {
             // TODO: handle adding an image
-//            val pickImg = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI)
-//            changeImage.launch(pickImg)
+            val pickImg = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI)
+            changeImage.launch(pickImg)
         }
 
         // Wait for submit button
@@ -46,16 +48,16 @@ class PatientAddReport : AppCompatActivity(){
             startActivity(intent)
         }
     }
-//
-//    private val changeImage = registerForActivityResult(
-//        ActivityResultContracts.StartActivityForResult()
-//    ) { it: ActivityResult ->
-//        if (it.resultCode == Activity.RESULT_OK) {
-//            val data = it.data
-//            val imgUri = data?.data
-//            previewImage.setImageURI(imgUri)
-//        }
-//    }
+
+    private val changeImage = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { it: ActivityResult ->
+        if (it.resultCode == Activity.RESULT_OK) {
+            val data = it.data
+            val imgUri = data?.data
+            previewImage.setImageURI(imgUri)
+        }
+    }
 
     private fun getCurrentDate(): String {
         val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
