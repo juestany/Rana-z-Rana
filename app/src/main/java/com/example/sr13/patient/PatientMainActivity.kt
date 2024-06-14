@@ -43,7 +43,7 @@ class PatientMainActivity : AppCompatActivity() {
 
         // Set a click listener for the button
         patientSubmitReportBtn.setOnClickListener {
-            val intent = Intent(this@PatientMainActivity, PatientAddReport::class.java)
+            val intent = Intent(this@PatientMainActivity, PatientAddReportActivity::class.java)
             startActivity(intent)
 
         }

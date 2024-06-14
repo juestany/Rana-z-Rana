@@ -1,56 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#FDFDFD"
-    tools:context=".MainActivity">
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#FDFDFD"
+        tools:context=".doctor.DoctorMyPatientsActivity">
 
     <TextView
-        android:id="@+id/moi_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:layout_marginBottom="28dp"
-        android:text="Moi pacjenci"
-        android:textColor="#0098FF"
-        android:textSize="30sp"
-        app:layout_constraintBottom_toTopOf="@+id/wyszukaj"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <EditText
-        android:id="@+id/wyszukaj"
-        android:layout_width="279dp"
-        android:layout_height="56dp"
-        android:layout_marginStart="68dp"
-        android:layout_marginTop="28dp"
-        android:layout_marginEnd="68dp"
-        android:layout_marginBottom="464dp"
-        android:ems="10"
-        android:fontFamily="sans-serif-thin"
-        android:inputType="textEmailAddress"
-        android:paddingLeft="40px"
-        android:text="Wyszukaj pacjenta"
-        android:textColor="#000000"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/moi_text" />
+            android:id="@+id/moi_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Moi pacjenci"
+            android:textColor="#0098FF"
+            android:textSize="30sp"
+            android:layout_marginTop="52dp"
+            app:layout_constraintEnd_toStartOf="@+id/addPatientBtn"
+            android:layout_marginBottom="24dp"
+            app:layout_constraintBottom_toTopOf="@+id/patientSubmittedReportsRecyclerView"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginEnd="14dp" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/patientSubmittedReportsRecyclerView"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/wyszukaj" />
+            android:id="@+id/patientSubmittedReportsRecyclerView"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintTop_toBottomOf="@+id/moi_text"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="119dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintHorizontal_bias="0.0" />
 
-
-
+    <Button
+            android:text="dodaj pacjenta"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/addPatientBtn"
+            app:layout_constraintStart_toEndOf="@+id/moi_text"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginBottom="40dp"
+            app:layout_constraintBottom_toTopOf="@+id/patientSubmittedReportsRecyclerView"
+            android:layout_marginEnd="11dp" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

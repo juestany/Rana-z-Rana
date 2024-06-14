@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.provider.MediaStore
 import android.widget.Button
-import android.widget.ImageButton
 import android.widget.TextView
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -16,7 +15,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class PatientAddReport : AppCompatActivity(){
+class PatientAddReportActivity : AppCompatActivity(){
 
     private lateinit var previewImage: AppCompatImageView
 
