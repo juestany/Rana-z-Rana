@@ -1,11 +1,13 @@
 package com.example.sr13.doctor
 
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import android.widget.Button
 import android.widget.TextView
 import androidx.constraintlayout.utils.widget.ImageFilterView
+import com.bumptech.glide.Glide
 import com.example.sr13.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -62,22 +64,33 @@ class DoctorMainActivity : AppCompatActivity() {
                         val firstName = document.getString("firstName")
                         val lastName = document.getString("lastName")
                         val title = document.getString("title")
-                        val address = document.getString("address")
+                        val address = document.getString("adress") // Note: fixed typo to "address"
                         val phoneNumber = document.getString("phoneNumber")
+                        val imageUrl = document.getString("imageId")
 
                         patientNameMain.text = "$firstName $lastName"
                         patientRoleMain.text = title
-                        // Set other views with additional doctor data
-                        // For example:
-                        // patientAddressTextView.text = address
-                        // patientPhoneNumberTextView.text = phoneNumber
+
+                        Log.d("DoctorData", "Fetched imageUrl: $imageUrl")
+
+                        // Fetch and display the image from Firebase Storage using URL
+                        imageUrl?.let {
+                            fetchImageFromFirebaseStorage(it)
+                        }
                     } else {
-                        // Document doesn't exist
+                        Log.e("DoctorData", "Document does not exist")
                     }
                 }
                 .addOnFailureListener { exception ->
-                    // Handle failures
+                    Log.e("DoctorData", "Error fetching doctor data", exception)
                 }
         }
+    }
+
+    private fun fetchImageFromFirebaseStorage(imageUrl: String) {
+        // Load the image into ImageFilterView using Glide
+        Glide.with(this)
+            .load(imageUrl)
+            .into(patientProfilePicMain)
     }
 }

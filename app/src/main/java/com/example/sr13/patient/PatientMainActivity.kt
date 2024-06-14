@@ -2,11 +2,13 @@ package com.example.sr13.patient
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import android.widget.Button
 import android.widget.TextView
 import androidx.constraintlayout.utils.widget.ImageFilterView
+import com.bumptech.glide.Glide
 import com.example.sr13.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -64,19 +66,31 @@ class PatientMainActivity : AppCompatActivity() {
                         val firstName = document.getString("firstName")
                         val lastName = document.getString("lastName")
                         val phoneNumber = document.getString("phoneNumber")
+                        val imageUrl = document.getString("imageId")
 
                         patientNameMain.text = "$firstName $lastName"
                         patientRoleMain.text = "Pacjent"
-                        // Set other views with additional patient data
-                        // For example:
-                        // patientPhoneNumberTextView.text = phoneNumber
+
+                        Log.d("PatientData", "Fetched imageUrl: $imageUrl")
+
+                        // Fetch and display the image from Firebase Storage using URL
+                        imageUrl?.let {
+                            fetchImageFromFirebaseStorage(it)
+                        }
                     } else {
-                        // Document doesn't exist
+                        Log.e("PatientData", "Document does not exist")
                     }
                 }
                 .addOnFailureListener { exception ->
-                    // Handle failures
+                    Log.e("PatientData", "Error fetching patient data", exception)
                 }
         }
+    }
+
+    private fun fetchImageFromFirebaseStorage(imageUrl: String) {
+        // Load the image into ImageFilterView using Glide
+        Glide.with(this)
+            .load(imageUrl)
+            .into(patientProfilePicMain)
     }
 }
