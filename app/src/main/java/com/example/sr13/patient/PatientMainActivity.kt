@@ -48,9 +48,6 @@ class PatientMainActivity : AppCompatActivity() {
 
         }
 
-        // Set up RecyclerView adapter, layout manager, etc.
-        // patientSubmittedReportsRecyclerView.layoutManager = LinearLayoutManager(this)
-        // patientSubmittedReportsRecyclerView.adapter = YourAdapter()
     }
 
     private fun getPatientData() {
@@ -72,8 +69,6 @@ class PatientMainActivity : AppCompatActivity() {
                         patientRoleMain.text = "Pacjent"
 
                         Log.d("PatientData", "Fetched imageUrl: $imageUrl")
-
-                        // Fetch and display the image from Firebase Storage using URL
                         imageUrl?.let {
                             fetchImageFromFirebaseStorage(it)
                         }
@@ -88,7 +83,6 @@ class PatientMainActivity : AppCompatActivity() {
     }
 
     private fun fetchImageFromFirebaseStorage(imageUrl: String) {
-        // Load the image into ImageFilterView using Glide
         Glide.with(this)
             .load(imageUrl)
             .into(patientProfilePicMain)

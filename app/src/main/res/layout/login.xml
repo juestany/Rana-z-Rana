@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
@@ -32,8 +33,7 @@
             android:ems="10"
             android:fontFamily="sans-serif-thin"
             android:inputType="textEmailAddress"
-            android:paddingLeft="40px"
-            android:text="E-mail"
+            android:hint="E-mail"
             android:textColor="#000000"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -50,8 +50,7 @@
             android:ems="10"
             android:fontFamily="sans-serif-thin"
             android:inputType="textPassword"
-            android:paddingLeft="50px"
-            android:text="Hasło"
+            android:hint="Hasło"
             android:textColor="#000000"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
