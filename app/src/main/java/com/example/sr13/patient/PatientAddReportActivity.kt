@@ -48,13 +48,7 @@ class PatientAddReportActivity : AppCompatActivity() {
             startImagePicker()
         }
 
-        // Wait for submit button
-        val patientSubmitReportBtn = findViewById<Button>(R.id.myPatientsBtn)
-        patientSubmitReportBtn.setOnClickListener {
-            // TODO: save everything to database in a report. fetch patient's comment
-            val intent = Intent(this, PatientMainActivity::class.java)
-            startActivity(intent)
-        findViewById<Button>(R.id.patientSubmitReportBtn).setOnClickListener {
+        findViewById<Button>(R.id.myPatientsBtn).setOnClickListener {
             saveReport()
         }
 

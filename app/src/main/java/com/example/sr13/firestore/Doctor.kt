@@ -4,23 +4,26 @@ import com.google.firebase.firestore.PropertyName
 
 data class Doctor(
     @PropertyName("id")
-    var id: String="",
+    var id: String = "",
 
     @PropertyName("imageId")
-    var imageiD: String="",
+    var imageId: String = "",
 
     @PropertyName("firstName")
-    var firstName: String="",
+    var firstName: String = "",
 
     @PropertyName("lastName")
-    var lastName: String="",
+    var lastName: String = "",
 
     @PropertyName("phoneNumber")
-    var phoneNumber: String="",
+    var phoneNumber: String = "",
 
-    @PropertyName("adress")
-    var adress: String="",
+    @PropertyName("address")
+    var address: String = "",
 
     @PropertyName("title")
-    var title: String=""
+    var title: String = "",
+
+    @PropertyName("patientIds")
+    var patientIds: List<String> = mutableListOf()
 )
