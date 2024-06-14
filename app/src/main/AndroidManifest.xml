@@ -39,12 +39,12 @@
                     android:value="" />
         </activity>
         <activity
-                android:name=".DoctorMainActivity"
+                android:name=".doctor.DoctorMainActivity"
                 android:exported="true">
             <!-- Możesz dodać ewentualne metadane -->
         </activity>
         <activity
-                android:name=".PatientMainActivity"
+                android:name=".patient.PatientMainActivity"
                 android:exported="true">
             <!-- Możesz dodać ewentualne metadane -->
         </activity>

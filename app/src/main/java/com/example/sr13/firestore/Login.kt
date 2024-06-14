@@ -1,4 +1,4 @@
-package com.example.sr13
+package com.example.sr13.firestore
 
 import com.google.firebase.firestore.PropertyName
 

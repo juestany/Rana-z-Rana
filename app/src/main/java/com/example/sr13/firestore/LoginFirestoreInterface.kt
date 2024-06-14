@@ -1,7 +1,5 @@
 package com.example.sr13.firestore
 
-import com.example.sr13.Login
-
 /**
  * Interfejs LoginFirestoreInterface definiuje operacje do interakcji z bazą danych Firestore.
  * Wszystkie operacje są oznaczone jako 'suspend', co oznacza, że mogą być wywoływane

@@ -1,4 +1,4 @@
-package com.example.sr13
+package com.example.sr13.doctor
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -6,10 +6,11 @@ import androidx.recyclerview.widget.RecyclerView
 import android.widget.Button
 import android.widget.TextView
 import androidx.constraintlayout.utils.widget.ImageFilterView
+import com.example.sr13.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
-class PatientMainActivity : AppCompatActivity() {
+class DoctorMainActivity : AppCompatActivity() {
 
     private lateinit var patientNameMain: TextView
     private lateinit var patientRoleMain: TextView
@@ -21,7 +22,7 @@ class PatientMainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.patient_main)
+        setContentView(R.layout.doctor_main)
 
         // Initialize Firebase components
         auth = FirebaseAuth.getInstance()
@@ -35,7 +36,7 @@ class PatientMainActivity : AppCompatActivity() {
         patientSubmittedReportsRecyclerView = findViewById(R.id.patientSubmittedReportsRecyclerView)
 
         // Set up initial values or listeners here
-        getPatientData()
+        getDoctorData()
 
         // Set a click listener for the button
         patientSubmitReportBtn.setOnClickListener {
@@ -48,24 +49,27 @@ class PatientMainActivity : AppCompatActivity() {
         // patientSubmittedReportsRecyclerView.adapter = YourAdapter()
     }
 
-    private fun getPatientData() {
+    private fun getDoctorData() {
         val user = FirebaseAuth.getInstance().currentUser
         val userId = auth.currentUser?.uid
 
         userId?.let { uid ->
-            firestore.collection("patient")
+            firestore.collection("doctor")
                 .document(uid)
                 .get()
                 .addOnSuccessListener { document ->
                     if (document != null) {
                         val firstName = document.getString("firstName")
                         val lastName = document.getString("lastName")
+                        val title = document.getString("title")
+                        val address = document.getString("address")
                         val phoneNumber = document.getString("phoneNumber")
 
                         patientNameMain.text = "$firstName $lastName"
-                        patientRoleMain.text = "Pacjent"
-                        // Set other views with additional patient data
+                        patientRoleMain.text = title
+                        // Set other views with additional doctor data
                         // For example:
+                        // patientAddressTextView.text = address
                         // patientPhoneNumberTextView.text = phoneNumber
                     } else {
                         // Document doesn't exist

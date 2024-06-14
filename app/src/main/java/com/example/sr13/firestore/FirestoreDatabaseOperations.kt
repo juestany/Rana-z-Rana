@@ -1,5 +1,4 @@
-package com.example.sr13
-import android.util.Log
+package com.example.sr13.firestore
 import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.toObject

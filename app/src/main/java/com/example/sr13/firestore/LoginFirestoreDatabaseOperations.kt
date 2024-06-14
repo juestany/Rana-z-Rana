@@ -1,5 +1,4 @@
 package com.example.sr13.firestore
-import com.example.sr13.Login
 import com.example.sr13.RegisterActivity
 import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
