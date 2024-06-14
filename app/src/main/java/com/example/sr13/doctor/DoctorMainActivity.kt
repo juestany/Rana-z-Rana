@@ -14,11 +14,12 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 class DoctorMainActivity : AppCompatActivity() {
 
-    private lateinit var patientNameMain: TextView
-    private lateinit var patientRoleMain: TextView
-    private lateinit var patientProfilePicMain: ImageFilterView
-    private lateinit var patientSubmitReportBtn: Button
-    private lateinit var patientSubmittedReportsRecyclerView: RecyclerView
+    private lateinit var doctorNameMain: TextView
+    private lateinit var doctorRoleMain: TextView
+    private lateinit var doctorProfilePicMain: ImageFilterView
+    private lateinit var doctorSubmitReportBtn: Button
+    private lateinit var doctorSubmittedReportsRecyclerView: RecyclerView
+    private lateinit var myPatientsBtn: Button
     private lateinit var auth: FirebaseAuth
     private lateinit var firestore: FirebaseFirestore
 
@@ -31,24 +32,13 @@ class DoctorMainActivity : AppCompatActivity() {
         firestore = FirebaseFirestore.getInstance()
 
         // Initialize views
-        patientNameMain = findViewById(R.id.patientNameMain)
-        patientRoleMain = findViewById(R.id.patientRoleMain)
-        patientProfilePicMain = findViewById(R.id.patientProfilePicMain)
-        patientSubmitReportBtn = findViewById(R.id.patientSubmitReportBtn)
-        patientSubmittedReportsRecyclerView = findViewById(R.id.patientSubmittedReportsRecyclerView)
+        doctorNameMain = findViewById(R.id.doctorNameMain)
+        doctorRoleMain = findViewById(R.id.doctorRoleMain)
+        doctorProfilePicMain = findViewById(R.id.doctorProfilePicMain)
+        doctorSubmittedReportsRecyclerView = findViewById(R.id.doctorTodaySubmittedReportsRecyclerView)
 
         // Set up initial values or listeners here
         getDoctorData()
-
-        // Set a click listener for the button
-        patientSubmitReportBtn.setOnClickListener {
-            // Handle button click
-            // For example, start a new activity or show a message
-        }
-
-        // Set up RecyclerView adapter, layout manager, etc.
-        // patientSubmittedReportsRecyclerView.layoutManager = LinearLayoutManager(this)
-        // patientSubmittedReportsRecyclerView.adapter = YourAdapter()
     }
 
     private fun getDoctorData() {
@@ -68,8 +58,8 @@ class DoctorMainActivity : AppCompatActivity() {
                         val phoneNumber = document.getString("phoneNumber")
                         val imageUrl = document.getString("imageId")
 
-                        patientNameMain.text = "$firstName $lastName"
-                        patientRoleMain.text = title
+                        doctorNameMain.text = "$firstName $lastName"
+                        doctorRoleMain.text = title
 
                         Log.d("DoctorData", "Fetched imageUrl: $imageUrl")
 
@@ -91,6 +81,6 @@ class DoctorMainActivity : AppCompatActivity() {
         // Load the image into ImageFilterView using Glide
         Glide.with(this)
             .load(imageUrl)
-            .into(patientProfilePicMain)
+            .into(doctorProfilePicMain)
     }
 }
