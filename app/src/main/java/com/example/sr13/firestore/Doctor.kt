@@ -6,6 +6,9 @@ data class Doctor(
     @PropertyName("id")
     var id: String="",
 
+    @PropertyName("imageId")
+    var imageiD: String="",
+
     @PropertyName("firstName")
     var firstName: String="",
 
