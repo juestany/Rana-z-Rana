@@ -1,7 +1,6 @@
 package com.example.sr13.firestore
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.PropertyName
-import com.google.j2objc.annotations.Property
 
 data class Patient(
     @PropertyName("id")
