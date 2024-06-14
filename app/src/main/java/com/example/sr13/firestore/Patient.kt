@@ -26,5 +26,8 @@ data class Patient(
     var adress: String="",
 
     @PropertyName("birthDate")
-    var birthDate: Timestamp = Timestamp.now()
+    var birthDate: Timestamp = Timestamp.now(),
+
+    @PropertyName("operation")
+    var operation: String = ""
 )
