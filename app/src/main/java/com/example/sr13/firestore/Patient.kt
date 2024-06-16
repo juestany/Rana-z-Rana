@@ -22,10 +22,10 @@ data class Patient(
     var phoneNumber: String="",
 
     @PropertyName("adress")
-    var adress: String="",
+    var adress: String ="",
 
     @PropertyName("birthDate")
-    var birthDate: Timestamp = Timestamp.now(),
+    var birthDate: Timestamp? = Timestamp.now(),
 
     @PropertyName("operation")
     var operation: String = "",

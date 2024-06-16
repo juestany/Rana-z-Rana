@@ -20,7 +20,7 @@
     <EditText
             android:id="@+id/addPatientName"
             android:layout_width="320dp"
-            android:layout_height="60dp"
+            android:layout_height="40dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="12dp"
             android:ems="10"
@@ -33,7 +33,7 @@
     <EditText
             android:id="@+id/addPatientLastName"
             android:layout_width="320dp"
-            android:layout_height="60dp"
+            android:layout_height="40dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:ems="10"
@@ -46,7 +46,7 @@
     <EditText
             android:id="@+id/addPatientPESEL"
             android:layout_width="320dp"
-            android:layout_height="60dp"
+            android:layout_height="40dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:ems="10"
@@ -59,7 +59,7 @@
     <EditText
             android:id="@+id/addPatientNumber"
             android:layout_width="0dp"
-            android:layout_height="60dp"
+            android:layout_height="40dp"
             android:layout_marginTop="16dp"
             android:ems="10"
             android:inputType="phone"
@@ -72,7 +72,7 @@
     <EditText
             android:id="@+id/addPatientAddress"
             android:layout_width="0dp"
-            android:layout_height="60dp"
+            android:layout_height="40dp"
             android:layout_marginTop="16dp"
             android:ems="10"
             android:inputType="text"
@@ -85,7 +85,7 @@
     <EditText
             android:id="@+id/addPatientDate"
             android:layout_width="320dp"
-            android:layout_height="60dp"
+            android:layout_height="40dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:ems="10"
@@ -94,21 +94,31 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/addPatientAddress" />
 
-    <!-- ImageView for selecting patient's image -->
+    <!-- Button for selecting patient's image -->
+    <Button
+            android:id="@+id/uploadImageBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="12dp"
+            android:text="Wybierz zdjęcie"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/addPatientDate" />
 
-    <!-- Button for adding the patient -->
+    <!-- ImageView for previewing patient's image -->
     <ImageView
-            android:id="@+id/addPatientImageBtn"
+            android:id="@+id/previewImage"
             android:layout_width="160dp"
             android:layout_height="160dp"
             android:layout_marginTop="12dp"
             android:contentDescription="Patient Image"
             app:layout_constraintEnd_toEndOf="@+id/addPatientDate"
             app:layout_constraintStart_toStartOf="@+id/addPatientDate"
-            app:layout_constraintTop_toBottomOf="@+id/addPatientDate"
-            tools:src="@drawable/ic_profile_icon"
+            app:layout_constraintTop_toBottomOf="@+id/uploadImageBtn"
+            tools:srcCompat="@android:drawable/ic_menu_gallery"
             app:layout_constraintHorizontal_bias="0.0" />
 
+    <!-- Button for adding the patient -->
     <Button
             android:id="@+id/addPatientBtn"
             android:layout_width="199dp"
@@ -117,6 +127,6 @@
             android:layout_marginTop="10dp"
             android:text="Dodaj pacjenta"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/addPatientImageBtn" />
+            app:layout_constraintTop_toBottomOf="@+id/previewImage" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

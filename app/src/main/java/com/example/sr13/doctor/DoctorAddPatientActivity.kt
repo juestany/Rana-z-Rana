@@ -1,21 +1,26 @@
 package com.example.sr13.doctor
 
+import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.sr13.R
 import com.example.sr13.firestore.Doctor
-import com.example.sr13.firestore.Patient
 import com.example.sr13.firestore.Login
+import com.example.sr13.firestore.Patient
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.Timestamp
+import com.google.firebase.storage.FirebaseStorage
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.random.Random
 
 class DoctorAddPatientActivity : AppCompatActivity() {
 
@@ -25,11 +30,13 @@ class DoctorAddPatientActivity : AppCompatActivity() {
     private lateinit var addPatientNumber: EditText
     private lateinit var addPatientAddress: EditText
     private lateinit var addPatientDate: EditText
-    private lateinit var addPatientImageBtn: ImageView
+    private lateinit var previewImage: ImageView
 
     private lateinit var auth: FirebaseAuth
     private lateinit var firestore: FirebaseFirestore
+    private lateinit var storage: FirebaseStorage
     private lateinit var currentDoctorId: String
+    private var imageUri: Uri? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,6 +44,7 @@ class DoctorAddPatientActivity : AppCompatActivity() {
 
         auth = FirebaseAuth.getInstance()
         firestore = FirebaseFirestore.getInstance()
+        storage = FirebaseStorage.getInstance()
         currentDoctorId = auth.currentUser?.uid ?: ""
 
         addPatientName = findViewById(R.id.addPatientName)
@@ -45,33 +53,57 @@ class DoctorAddPatientActivity : AppCompatActivity() {
         addPatientNumber = findViewById(R.id.addPatientNumber)
         addPatientAddress = findViewById(R.id.addPatientAddress)
         addPatientDate = findViewById(R.id.addPatientDate)
-        addPatientImageBtn = findViewById(R.id.addPatientImageBtn)
+        previewImage = findViewById(R.id.previewImage)
+
+        val uploadImageBtn = findViewById<Button>(R.id.uploadImageBtn)
+        uploadImageBtn.setOnClickListener { openImageChooser() }
 
         val addPatientBtn = findViewById<Button>(R.id.addPatientBtn)
-        addPatientBtn.setOnClickListener {
-            val firstName = addPatientName.text.toString().trim()
-            val lastName = addPatientLastName.text.toString().trim()
-            val pesel = addPatientPESEL.text.toString().trim()
-            val phoneNumber = addPatientNumber.text.toString().trim()
-            val address = addPatientAddress.text.toString().trim()
-            val birthDateString = addPatientDate.text.toString().trim()
+        addPatientBtn.setOnClickListener { savePatient() }
+    }
 
-            if (validateInput(firstName, lastName, pesel, phoneNumber, address, birthDateString)) {
-                val birthDate = convertToDate(birthDateString)
-                if (birthDate != null) {
-                    val email = generatePatientEmail(firstName, lastName)
-                    val patient = Patient(
-                        id = UUID.randomUUID().toString(),
-                        firstName = firstName,
-                        lastName = lastName,
-                        pesel = pesel,
-                        phoneNumber = phoneNumber,
-                        adress = address,
-                        birthDate = birthDate,
-                        doctorId = currentDoctorId
-                    )
-                    val password = generateRandomPassword()
+    private fun openImageChooser() {
+        val intent = Intent()
+        intent.type = "image/*"
+        intent.action = Intent.ACTION_GET_CONTENT
+        startActivityForResult(Intent.createChooser(intent, "Wybierz zdjęcie"), PICK_IMAGE_REQUEST)
+    }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK && data != null && data.data != null) {
+            imageUri = data.data
+            previewImage.setImageURI(imageUri)
+        }
+    }
+
+    private fun savePatient() {
+        val firstName = addPatientName.text.toString().trim()
+        val lastName = addPatientLastName.text.toString().trim()
+        val pesel = addPatientPESEL.text.toString().trim()
+        val phoneNumber = addPatientNumber.text.toString().trim()
+        val address = addPatientAddress.text.toString().trim()
+        val birthDateString = addPatientDate.text.toString().trim()
+
+        if (validateInput(firstName, lastName, pesel, phoneNumber, address, birthDateString)) {
+            val birthDate = convertToDate(birthDateString)
+            if (birthDate != null) {
+                val email = generatePatientEmail(firstName, lastName)
+                val patient = Patient(
+                    id = UUID.randomUUID().toString(),
+                    firstName = firstName,
+                    lastName = lastName,
+                    pesel = pesel,
+                    phoneNumber = phoneNumber,
+                    adress = address,
+                    birthDate = birthDate,
+                    doctorId = currentDoctorId
+                )
+                val password = generateRandomPassword()
+
+                if (imageUri != null) {
+                    uploadImageToStorage(imageUri!!, patient, email, password)
+                } else {
                     addPatientToFirestore(patient)
                     savePatientLogin(email, password, "patient")
                 }
@@ -79,10 +111,25 @@ class DoctorAddPatientActivity : AppCompatActivity() {
         }
     }
 
-    private fun generatePatientEmail(firstName: String, lastName: String): String {
-        val firstThreeLettersFirstName = if (firstName.length >= 3) firstName.substring(0, 3).toLowerCase(Locale.getDefault()) else firstName.toLowerCase(Locale.getDefault())
-        val firstThreeLettersLastName = if (lastName.length >= 3) lastName.substring(0, 3).toLowerCase(Locale.getDefault()) else lastName.toLowerCase(Locale.getDefault())
-        return "$firstThreeLettersFirstName$firstThreeLettersLastName@gmail.com"
+    private fun uploadImageToStorage(imageUri: Uri, patient: Patient, email: String, password: String) {
+        val storageRef = storage.reference
+        val imageId = UUID.randomUUID().toString()
+        val imagesRef = storageRef.child("patient/$imageId")
+
+        imagesRef.putFile(imageUri).continueWithTask { task ->
+            if (!task.isSuccessful) {
+                task.exception?.let { throw it }
+            }
+            imagesRef.downloadUrl
+        }.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                patient.imageiD = imageId
+                addPatientToFirestore(patient)
+                savePatientLogin(email, password, "pacjent")
+            } else {
+                Log.e(TAG, "Failed to upload image to storage", task.exception)
+            }
+        }
     }
 
     private fun validateInput(firstName: String, lastName: String, pesel: String,
@@ -103,19 +150,19 @@ class DoctorAddPatientActivity : AppCompatActivity() {
     }
 
     private fun addPatientToFirestore(patient: Patient) {
-        firestore.collection("patients")
+        firestore.collection("patient")
             .document(patient.id)
             .set(patient)
             .addOnSuccessListener {
                 updateDoctorPatientList(patient.id)
             }
             .addOnFailureListener { e ->
-                // Handle failure
+                Log.e(TAG, "Error adding patient to Firestore", e)
             }
     }
 
     private fun updateDoctorPatientList(patientId: String) {
-        firestore.collection("doctors")
+        firestore.collection("doctor")
             .document(currentDoctorId)
             .get()
             .addOnSuccessListener { document ->
@@ -124,7 +171,7 @@ class DoctorAddPatientActivity : AppCompatActivity() {
                     val updatedPatientIds = doctor?.patientIds?.toMutableList() ?: mutableListOf()
                     updatedPatientIds.add(patientId)
 
-                    firestore.collection("doctors")
+                    firestore.collection("doctor")
                         .document(currentDoctorId)
                         .update("patientIds", updatedPatientIds)
                         .addOnSuccessListener {
@@ -132,26 +179,32 @@ class DoctorAddPatientActivity : AppCompatActivity() {
                             finish()
                         }
                         .addOnFailureListener { e ->
-                            // Handle failure
+                            Log.e(TAG, "Error updating doctor patient list", e)
                         }
                 }
             }
             .addOnFailureListener { e ->
-                // Handle failure
+                Log.e(TAG, "Error getting doctor document", e)
             }
     }
 
     private fun savePatientLogin(email: String, password: String, role: String) {
-        val login = Login(email = email, password = password, role = "patient")
+        val login = Login(email = email, password = password, role = "pacjent")
         firestore.collection("logins")
             .document(auth.currentUser?.uid ?: "")
             .set(login)
             .addOnSuccessListener {
-                // Handle success if needed
+                Log.d(TAG, "Patient login saved successfully")
             }
             .addOnFailureListener { e ->
-                // Handle failure
+                Log.e(TAG, "Error saving patient login", e)
             }
+    }
+
+    private fun generatePatientEmail(firstName: String, lastName: String): String {
+        val firstThreeLettersFirstName = if (firstName.length >= 3) firstName.substring(0, 3).lowercase(Locale.getDefault()) else firstName.lowercase(Locale.getDefault())
+        val firstThreeLettersLastName = if (lastName.length >= 3) lastName.substring(0, 3).lowercase(Locale.getDefault()) else lastName.lowercase(Locale.getDefault())
+        return "$firstThreeLettersFirstName$firstThreeLettersLastName@gmail.com"
     }
 
     private fun generateRandomPassword(): String {
@@ -159,5 +212,10 @@ class DoctorAddPatientActivity : AppCompatActivity() {
         return (1..8)
             .map { allowedChars.random() }
             .joinToString("")
+    }
+
+    companion object {
+        private const val TAG = "DoctorAddPatientActivity"
+        private const val PICK_IMAGE_REQUEST = 1
     }
 }
