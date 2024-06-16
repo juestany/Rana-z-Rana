@@ -67,6 +67,10 @@
                 android:exported="true">
         </activity>
         <activity
+                android:name=".doctor.DoctorAddPatientSuccessActivity"
+                android:exported="true">
+        </activity>
+        <activity
                 android:name=".patient.PatientMainActivity"
                 android:exported="true">
         </activity>

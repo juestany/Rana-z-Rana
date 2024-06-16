@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.provider.MediaStore
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
@@ -100,8 +99,10 @@ class DoctorAddPatientActivity : AppCompatActivity() {
                         if (task.isSuccessful) {
                             val user = task.result?.user
                             if (user != null) {
+                                val patientId = user.uid // Użyj UID użytkownika jako ID pacjenta
+
                                 val patient = Patient(
-                                    id = UUID.randomUUID().toString(),
+                                    id = patientId,
                                     firstName = firstName,
                                     lastName = lastName,
                                     pesel = pesel,
@@ -117,6 +118,7 @@ class DoctorAddPatientActivity : AppCompatActivity() {
                                 } else {
                                     addPatientToFirestore(patient)
                                     savePatientLogin(email, password, "pacjent")
+                                    navigateToSuccessScreen(email, password)
                                 }
                             }
                         } else {
@@ -143,6 +145,7 @@ class DoctorAddPatientActivity : AppCompatActivity() {
                 patient.imageiD = imageId
                 addPatientToFirestore(patient)
                 savePatientLogin(email, password, "pacjent")
+                navigateToSuccessScreen(email, password)
             } else {
                 Log.e(TAG, "Failed to upload image to storage", task.exception)
             }
@@ -192,8 +195,7 @@ class DoctorAddPatientActivity : AppCompatActivity() {
                         .document(currentDoctorId)
                         .update("patientIds", updatedPatientIds)
                         .addOnSuccessListener {
-                            startActivity(Intent(this, DoctorMyPatientsActivity::class.java))
-                            finish()
+                            Log.d(TAG, "Doctor patient list updated successfully")
                         }
                         .addOnFailureListener { e ->
                             Log.e(TAG, "Error updating doctor patient list", e)
@@ -206,7 +208,7 @@ class DoctorAddPatientActivity : AppCompatActivity() {
     }
 
     private fun savePatientLogin(email: String, password: String, role: String) {
-        val login = Login(email = email, password = password, role = "pacjent")
+        val login = Login(email = email, password = password, role = role)
         firestore.collection("login")
             .document(auth.currentUser?.uid ?: "")
             .set(login)
@@ -229,6 +231,14 @@ class DoctorAddPatientActivity : AppCompatActivity() {
         return (1..8)
             .map { allowedChars.random() }
             .joinToString("")
+    }
+
+    private fun navigateToSuccessScreen(email: String, password: String) {
+        val intent = Intent(this, DoctorAddPatientSuccessActivity::class.java)
+        intent.putExtra("patientLogin", email)
+        intent.putExtra("patientPassword", password)
+        startActivity(intent)
+        finish()
     }
 
     companion object {
