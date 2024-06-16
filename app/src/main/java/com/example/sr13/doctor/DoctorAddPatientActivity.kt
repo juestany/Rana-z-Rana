@@ -17,6 +17,7 @@ import com.example.sr13.firestore.Login
 import com.example.sr13.firestore.Patient
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import java.text.SimpleDateFormat
@@ -30,6 +31,7 @@ class DoctorAddPatientActivity : AppCompatActivity() {
     private lateinit var addPatientNumber: EditText
     private lateinit var addPatientAddress: EditText
     private lateinit var addPatientDate: EditText
+    private lateinit var addPatientOperation: EditText
     private lateinit var previewImage: ImageView
 
     private lateinit var auth: FirebaseAuth
@@ -53,6 +55,7 @@ class DoctorAddPatientActivity : AppCompatActivity() {
         addPatientNumber = findViewById(R.id.addPatientNumber)
         addPatientAddress = findViewById(R.id.addPatientAddress)
         addPatientDate = findViewById(R.id.addPatientDate)
+        addPatientOperation = findViewById(R.id.addPatientOperation)
         previewImage = findViewById(R.id.previewImage)
 
         val uploadImageBtn = findViewById<Button>(R.id.uploadImageBtn)
@@ -84,29 +87,43 @@ class DoctorAddPatientActivity : AppCompatActivity() {
         val phoneNumber = addPatientNumber.text.toString().trim()
         val address = addPatientAddress.text.toString().trim()
         val birthDateString = addPatientDate.text.toString().trim()
+        val operation = addPatientOperation.text.toString().trim()
 
-        if (validateInput(firstName, lastName, pesel, phoneNumber, address, birthDateString)) {
+        if (validateInput(firstName, lastName, pesel, phoneNumber, address, birthDateString, operation)) {
             val birthDate = convertToDate(birthDateString)
             if (birthDate != null) {
                 val email = generatePatientEmail(firstName, lastName)
-                val patient = Patient(
-                    id = UUID.randomUUID().toString(),
-                    firstName = firstName,
-                    lastName = lastName,
-                    pesel = pesel,
-                    phoneNumber = phoneNumber,
-                    adress = address,
-                    birthDate = birthDate,
-                    doctorId = currentDoctorId
-                )
                 val password = generateRandomPassword()
 
-                if (imageUri != null) {
-                    uploadImageToStorage(imageUri!!, patient, email, password)
-                } else {
-                    addPatientToFirestore(patient)
-                    savePatientLogin(email, password, "patient")
-                }
+                auth.createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(this) { task ->
+                        if (task.isSuccessful) {
+                            val user = task.result?.user
+                            if (user != null) {
+                                val patient = Patient(
+                                    id = UUID.randomUUID().toString(),
+                                    firstName = firstName,
+                                    lastName = lastName,
+                                    pesel = pesel,
+                                    phoneNumber = phoneNumber,
+                                    adress = address,
+                                    birthDate = birthDate,
+                                    operation = operation,
+                                    doctorId = currentDoctorId
+                                )
+
+                                if (imageUri != null) {
+                                    uploadImageToStorage(imageUri!!, patient, email, password)
+                                } else {
+                                    addPatientToFirestore(patient)
+                                    savePatientLogin(email, password, "pacjent")
+                                }
+                            }
+                        } else {
+                            Log.e(TAG, "Failed to create user in Firebase Authentication", task.exception)
+                            Toast.makeText(this, "Failed to create patient account", Toast.LENGTH_SHORT).show()
+                        }
+                    }
             }
         }
     }
@@ -133,7 +150,7 @@ class DoctorAddPatientActivity : AppCompatActivity() {
     }
 
     private fun validateInput(firstName: String, lastName: String, pesel: String,
-                              phoneNumber: String, address: String, birthDate: String): Boolean {
+                              phoneNumber: String, address: String, birthDate: String, operation: String): Boolean {
         // Implement validation logic as per your requirements
         return true // Dummy validation, replace with actual logic
     }
@@ -190,7 +207,7 @@ class DoctorAddPatientActivity : AppCompatActivity() {
 
     private fun savePatientLogin(email: String, password: String, role: String) {
         val login = Login(email = email, password = password, role = "pacjent")
-        firestore.collection("logins")
+        firestore.collection("login")
             .document(auth.currentUser?.uid ?: "")
             .set(login)
             .addOnSuccessListener {
