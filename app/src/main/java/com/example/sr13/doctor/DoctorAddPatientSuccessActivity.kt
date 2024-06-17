@@ -26,7 +26,7 @@ class DoctorAddPatientSuccessActivity : AppCompatActivity() {
     }
 
     fun onBackToPatientsClicked(view: android.view.View) {
-        val intent = Intent(this, DoctorMyPatientsActivity::class.java)
+        val intent = Intent(this@DoctorAddPatientSuccessActivity, DoctorMyPatientsActivity::class.java)
         startActivity(intent)
         finish()
     }

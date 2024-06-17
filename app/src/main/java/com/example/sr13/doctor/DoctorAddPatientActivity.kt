@@ -99,7 +99,7 @@ class DoctorAddPatientActivity : AppCompatActivity() {
                         if (task.isSuccessful) {
                             val user = task.result?.user
                             if (user != null) {
-                                val patientId = user.uid // Użyj UID użytkownika jako ID pacjenta
+                                val patientId = user.uid
 
                                 val patient = Patient(
                                     id = patientId,
