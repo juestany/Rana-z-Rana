@@ -55,11 +55,11 @@
                 android:exported="true">
         </activity>
         <activity
-                android:name=".doctor.DoctorCheckPatientActivity"
+                android:name=".doctor.DoctorMyPatientsActivity"
                 android:exported="true">
         </activity>
         <activity
-                android:name=".doctor.DoctorMyPatientsActivity"
+                android:name=".doctor.DoctorCheckPatientActivity"
                 android:exported="true">
         </activity>
         <activity

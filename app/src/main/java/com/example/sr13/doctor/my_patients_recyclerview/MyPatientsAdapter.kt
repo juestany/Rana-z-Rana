@@ -26,7 +26,7 @@ class MyPatientsAdapter(
 
         // Set the click listener for the item
         holder.itemView.setOnClickListener {
-            onItemClick(MyPatientsViewModel.text)
+            onItemClick(MyPatientsViewModel.patientId)
         }
     }
 
