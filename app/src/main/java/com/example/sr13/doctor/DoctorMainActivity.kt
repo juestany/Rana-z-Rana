@@ -15,6 +15,9 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 class DoctorMainActivity : AppCompatActivity() {
 
+    //TODO: better looking layout
+    //TODO: today's reports recycler view
+
     private lateinit var doctorNameMain: TextView
     private lateinit var doctorRoleMain: TextView
     private lateinit var doctorProfilePicMain: ImageFilterView

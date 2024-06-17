@@ -4,14 +4,14 @@ import com.google.firebase.Timestamp
 import com.google.firebase.firestore.PropertyName
 
 data class Report(
-    @PropertyName("id")
-    var id: String="",
+    @PropertyName("reportId")
+    var reportId: String="",
 
     @PropertyName("userId")
     var userId: String="",
 
-    @PropertyName("imageId")
-    var imageiD: String="",
+    @PropertyName("imageUrl")
+    var imageUrl: String="",
 
     @PropertyName("comment")
     var comment: String="",
