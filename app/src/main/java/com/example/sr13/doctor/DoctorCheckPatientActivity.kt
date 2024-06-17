@@ -42,7 +42,9 @@ class DoctorCheckPatientActivity : AppCompatActivity() {
         firestore = FirebaseFirestore.getInstance()
 
         reportsAdapter = SubmittedReportsAdapter(reportsList) { reportId ->
-            // TODO: Handle report click
+            val intent = Intent(this, DoctorCheckPatientReportActivity::class.java)
+            intent.putExtra("REPORT_ID", reportId)
+            startActivity(intent)
         }
 
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -131,7 +133,7 @@ class DoctorCheckPatientActivity : AppCompatActivity() {
 
     private fun loadPatientReports(patientId: String) {
         firestore.collection("reports")
-            .whereEqualTo("userId", patientId) // Assuming "patientId" is used in reports collection
+            .whereEqualTo("userId", patientId)
             .get()
             .addOnSuccessListener { documents ->
                 for (document in documents) {
@@ -147,7 +149,8 @@ class DoctorCheckPatientActivity : AppCompatActivity() {
                                 val reportModel = SubmittedReportsViewModel(
                                     R.drawable.ic_paper_icon,
                                     fullName,
-                                    report.date // Assuming this is the date field in your Report model
+                                    report.date,
+                                    report.reportId
                                 )
                                 reportsList.add(reportModel)
                                 reportsAdapter.notifyDataSetChanged()

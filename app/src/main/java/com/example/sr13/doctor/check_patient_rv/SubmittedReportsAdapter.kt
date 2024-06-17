@@ -27,7 +27,7 @@ class SubmittedReportsAdapter (
 
         // Set the click listener for the item
         holder.itemView.setOnClickListener {
-            onItemClick(SubmittedReportsViewModel.patientId)
+            onItemClick(SubmittedReportsViewModel.reportId)
         }
     }
 
