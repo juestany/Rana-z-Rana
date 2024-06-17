@@ -18,6 +18,7 @@ import com.example.sr13.R
 import com.example.sr13.firestore.Patient
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.storage.FirebaseStorage
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -147,6 +148,9 @@ class PatientAddReportActivity : AppCompatActivity() {
                 Log.d(TAG, "Report added with ID: $reportId")
                 Toast.makeText(this, "Raport został dodany pomyślnie", Toast.LENGTH_SHORT).show()
 
+                // Wysyłanie powiadomienia do siebie (pacjenta)
+                sendNotificationToPatient(reportId)
+
                 // Pobranie danych pacjenta, aby uzyskać doctorId
                 firestore.collection("patient")
                     .document(currentUserId)
@@ -174,6 +178,34 @@ class PatientAddReportActivity : AppCompatActivity() {
             }
     }
 
+    private fun sendNotificationToPatient(reportId: String) {
+        val currentTokenTask = FirebaseMessaging.getInstance().token
+        currentTokenTask.addOnSuccessListener { currentToken ->
+            val payload = hashMapOf(
+                "notification" to hashMapOf(
+                    "title" to "Twój raport został dodany",
+                    "body" to "Twój raport został pomyślnie dodany."
+                ),
+                "data" to hashMapOf(
+                    "reportId" to reportId // Przekazanie ID raportu
+                )
+            )
+
+            firestore.collection("notifications")
+                .document(currentToken)
+                .set(payload)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        //Log.d(TAG, "Notification sent successfully to patient: $currentToken")
+                    } else {
+                        //Log.e(TAG, "Failed to send notification to patient: $currentToken", task.exception)
+                    }
+                }
+        }.addOnFailureListener { e ->
+            Log.e(TAG, "Error retrieving token", e)
+        }
+    }
+
     private fun sendNotificationToDoctor(doctorId: String?) {
         if (doctorId.isNullOrEmpty()) {
             Log.e(TAG, "Doctor ID is null or empty")
@@ -190,16 +222,14 @@ class PatientAddReportActivity : AppCompatActivity() {
             )
         )
 
-        // Zakładam, że masz funkcję do wysyłania powiadomień do lekarza w swoim backendzie
-        // Tutaj jest miejsce na implementację tej funkcji
         firestore.collection("notifications")
             .document(doctorId)
             .set(payload)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    Log.d(TAG, "Notification sent successfully to doctor: $doctorId")
+                    //Log.d(TAG, "Notification sent successfully to doctor: $doctorId")
                 } else {
-                    Log.e(TAG, "Failed to send notification to doctor: $doctorId", task.exception)
+                    //Log.e(TAG, "Failed to send notification to doctor: $doctorId", task.exception)
                 }
             }
     }
