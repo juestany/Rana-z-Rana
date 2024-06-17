@@ -1,4 +1,4 @@
-package com.example.sr13.doctor.my_patients_recyclerview
+package com.example.sr13.doctor.my_patients_rv
 
 import android.view.LayoutInflater
 import android.view.View
@@ -26,7 +26,7 @@ class MyPatientsAdapter(
 
         // Set the click listener for the item
         holder.itemView.setOnClickListener {
-            onItemClick(MyPatientsViewModel.text)
+            onItemClick(MyPatientsViewModel.patientId)
         }
     }
 
