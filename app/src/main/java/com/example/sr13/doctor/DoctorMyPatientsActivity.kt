@@ -7,9 +7,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.sr13.R
-import com.example.sr13.doctor.DoctorAddPatientActivity
-import com.example.sr13.doctor.my_patients_recyclerview.MyPatientsAdapter
-import com.example.sr13.doctor.my_patients_recyclerview.MyPatientsViewModel
+import com.example.sr13.doctor.my_patients_rv.MyPatientsAdapter
+import com.example.sr13.doctor.my_patients_rv.MyPatientsViewModel
 import com.example.sr13.firestore.Doctor
 import com.example.sr13.firestore.Patient
 import com.google.firebase.auth.FirebaseAuth

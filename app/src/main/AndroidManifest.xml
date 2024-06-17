@@ -67,6 +67,10 @@
                 android:exported="true">
         </activity>
         <activity
+                android:name=".doctor.DoctorCheckPatientReportActivity"
+                android:exported="true">
+        </activity>
+        <activity
                 android:name=".doctor.DoctorAddPatientSuccessActivity"
                 android:exported="true">
         </activity>

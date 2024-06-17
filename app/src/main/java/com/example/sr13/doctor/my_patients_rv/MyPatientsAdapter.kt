@@ -1,4 +1,4 @@
-package com.example.sr13.doctor.my_patients_recyclerview
+package com.example.sr13.doctor.my_patients_rv
 
 import android.view.LayoutInflater
 import android.view.View
