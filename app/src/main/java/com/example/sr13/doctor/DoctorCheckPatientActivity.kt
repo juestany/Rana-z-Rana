@@ -8,7 +8,9 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.example.sr13.R
+import com.example.sr13.firestore.Doctor
 import com.example.sr13.firestore.Patient
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
 class DoctorCheckPatientActivity : AppCompatActivity() {
@@ -17,6 +19,9 @@ class DoctorCheckPatientActivity : AppCompatActivity() {
     private lateinit var firestore: FirebaseFirestore
     private lateinit var patientNameMain: TextView
     private lateinit var patientProfilePic: ImageView
+
+    private var patientId: String? = null
+    private var doctorId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,13 +33,16 @@ class DoctorCheckPatientActivity : AppCompatActivity() {
         firestore = FirebaseFirestore.getInstance()
 
         val patientId = intent.getStringExtra("PATIENT_ID")
-        if (patientId != null) {
-            loadPatientData(patientId)
+        doctorId = FirebaseAuth.getInstance().currentUser?.uid
+
+        patientId?.let {
+            loadPatientData(it)
         }
 
         removePatientBtn.setOnClickListener {
-            val intent = Intent(this@DoctorCheckPatientActivity, DoctorMyPatientsActivity::class.java)
-            startActivity(intent)
+            patientId?.let { id ->
+                removePatientFromDatabase(id)
+            }
         }
     }
 
@@ -64,5 +72,43 @@ class DoctorCheckPatientActivity : AppCompatActivity() {
         Glide.with(this)
             .load(imageUrl)
             .into(patientProfilePic)
+    }
+
+    private fun removePatientFromDatabase(patientId: String) {
+        // Remove the patient document
+        firestore.collection("patient")
+            .document(patientId)
+            .delete()
+            .addOnSuccessListener {
+                // Successfully deleted the patient
+                removePatientFromDoctor(patientId)
+            }
+            .addOnFailureListener { e ->
+                // Handle any errors
+            }
+    }
+
+    private fun removePatientFromDoctor(patientId: String) {
+        doctorId?.let { docId ->
+            val doctorRef = firestore.collection("doctor").document(docId)
+
+            firestore.runTransaction { transaction ->
+                val doctorSnapshot = transaction.get(doctorRef)
+                val doctor = doctorSnapshot.toObject(Doctor::class.java)
+                doctor?.let {
+                    val updatedPatientIds = it.patientIds.toMutableList().apply {
+                        remove(patientId)
+                    }
+                    transaction.update(doctorRef, "patientIds", updatedPatientIds)
+                }
+            }.addOnSuccessListener {
+                // Successfully removed the patient from the doctor's list
+                val intent = Intent(this@DoctorCheckPatientActivity, DoctorMyPatientsActivity::class.java)
+                startActivity(intent)
+                finish()
+            }.addOnFailureListener { e ->
+                // Handle any errors
+            }
+        }
     }
 }
