@@ -122,7 +122,6 @@ class PatientAddReportActivity : AppCompatActivity() {
                     val downloadUri = task.result
                     saveReportToFirestore(imageId, downloadUri.toString())
                 } else {
-                    // Handle failures
                     Log.e(TAG, "Failed to upload image to storage")
                     Toast.makeText(this, "Nie udało się przesłać obrazu do storage", Toast.LENGTH_SHORT).show()
                 }
@@ -131,7 +130,9 @@ class PatientAddReportActivity : AppCompatActivity() {
     }
 
     private fun saveReportToFirestore(imageId: String, imageUrl: String) {
+        val reportId = UUID.randomUUID().toString() // Generowanie unikalnego ID raportu
         val report = hashMapOf(
+            "reportId" to reportId, // Dodanie reportId do dokumentu
             "imageId" to imageId,
             "userId" to currentUserId,
             "imageUrl" to imageUrl,
@@ -140,11 +141,32 @@ class PatientAddReportActivity : AppCompatActivity() {
         )
 
         firestore.collection("reports")
-            .add(report)
-            .addOnSuccessListener { documentReference ->
-                Log.d(TAG, "Report added with ID: ${documentReference.id}")
+            .document(reportId) // Ustawienie reportId jako ID dokumentu
+            .set(report)
+            .addOnSuccessListener {
+                Log.d(TAG, "Report added with ID: $reportId")
                 Toast.makeText(this, "Raport został dodany pomyślnie", Toast.LENGTH_SHORT).show()
-                finish() // Close activity after successfully adding report
+
+                // Pobranie danych pacjenta, aby uzyskać doctorId
+                firestore.collection("patient")
+                    .document(currentUserId)
+                    .get()
+                    .addOnSuccessListener { patientSnapshot ->
+                        if (patientSnapshot != null) {
+                            val patient = patientSnapshot.toObject(Patient::class.java)
+                            val doctorId = patient?.doctorId
+
+                            // Wysłanie powiadomienia do lekarza
+                            sendNotificationToDoctor(doctorId)
+                        } else {
+                            Log.e(TAG, "No such document")
+                        }
+                    }
+                    .addOnFailureListener { exception ->
+                        Log.e(TAG, "Error getting patient document: ", exception)
+                    }
+
+                finish() // Zamknięcie activity po pomyślnym dodaniu raportu
             }
             .addOnFailureListener { e ->
                 Log.e(TAG, "Error adding report", e)
@@ -152,11 +174,41 @@ class PatientAddReportActivity : AppCompatActivity() {
             }
     }
 
+    private fun sendNotificationToDoctor(doctorId: String?) {
+        if (doctorId.isNullOrEmpty()) {
+            Log.e(TAG, "Doctor ID is null or empty")
+            return
+        }
+
+        val payload = hashMapOf(
+            "notification" to hashMapOf(
+                "title" to "Nowy raport dodany",
+                "body" to "Nowy raport został dodany przez pacjenta."
+            ),
+            "data" to hashMapOf(
+                "patientId" to currentUserId // Przekazanie ID pacjenta
+            )
+        )
+
+        // Zakładam, że masz funkcję do wysyłania powiadomień do lekarza w swoim backendzie
+        // Tutaj jest miejsce na implementację tej funkcji
+        firestore.collection("notifications")
+            .document(doctorId)
+            .set(payload)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Log.d(TAG, "Notification sent successfully to doctor: $doctorId")
+                } else {
+                    Log.e(TAG, "Failed to send notification to doctor: $doctorId", task.exception)
+                }
+            }
+    }
+
     private fun loadPatientData() {
         val user = auth.currentUser
         user?.let {
             currentUserId = it.uid
-            firestore.collection("patients")
+            firestore.collection("patient")
                 .document(currentUserId)
                 .get()
                 .addOnSuccessListener { document ->
