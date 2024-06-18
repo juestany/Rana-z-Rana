@@ -1,6 +1,7 @@
 package com.example.sr13.doctor
 
 import android.content.Intent
+import android.icu.text.SimpleDateFormat
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
@@ -8,17 +9,21 @@ import androidx.recyclerview.widget.RecyclerView
 import android.widget.Button
 import android.widget.TextView
 import androidx.constraintlayout.utils.widget.ImageFilterView
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.example.sr13.LoginActivity
 import com.example.sr13.R
+import com.example.sr13.doctor.check_patient_rv.SubmittedReportsAdapter
+import com.example.sr13.doctor.check_patient_rv.SubmittedReportsViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import java.util.Date
+import java.util.Locale
 
 class DoctorMainActivity : AppCompatActivity() {
 
     //TODO: better looking layout
     //TODO: today's reports recycler view
-    // TODO: log out button
 
     private lateinit var doctorNameMain: TextView
     private lateinit var doctorRoleMain: TextView
@@ -47,6 +52,7 @@ class DoctorMainActivity : AppCompatActivity() {
 
         // Set up initial values or listeners here
         getDoctorData()
+        setupRecyclerView()
 
         myPatientsBtn.setOnClickListener() {
             val intent = Intent(this@DoctorMainActivity, DoctorMyPatientsActivity::class.java)
@@ -62,7 +68,6 @@ class DoctorMainActivity : AppCompatActivity() {
     }
 
     private fun getDoctorData() {
-        val user = FirebaseAuth.getInstance().currentUser
         val userId = auth.currentUser?.uid
 
         userId?.let { uid ->
@@ -103,4 +108,58 @@ class DoctorMainActivity : AppCompatActivity() {
             .load(imageUrl)
             .into(doctorProfilePicMain)
     }
+
+    private fun setupRecyclerView() {
+        doctorSubmittedReportsRecyclerView.layoutManager = LinearLayoutManager(this)
+        fetchTodayReports()
+    }
+
+    private fun fetchTodayReports() {
+        val today = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
+        Log.d("DoctorMainActivity", "Today's date: $today")
+
+        firestore.collection("reports")
+            .whereEqualTo("date", today)
+            .get()
+            .addOnSuccessListener { documents ->
+                val reportsList = mutableListOf<SubmittedReportsViewModel>()
+                for (document in documents) {
+                    val patientId = document.getString("userId") ?: ""
+                    val reportDate = document.getString("date") ?: ""
+                    val reportId = document.id
+
+                    firestore.collection("patient")
+                        .document(patientId)
+                        .get()
+                        .addOnSuccessListener { patientDocument ->
+                            if (patientDocument.exists()) {
+                                val firstName = patientDocument.getString("firstName") ?: ""
+                                val lastName = patientDocument.getString("lastName") ?: ""
+                                val fullName = "$firstName $lastName"
+
+                                val reportModel = SubmittedReportsViewModel(
+                                    R.drawable.ic_profile_icon,
+                                    fullName,
+                                    reportDate,
+                                    reportId
+                                )
+                                reportsList.add(reportModel)
+                                doctorSubmittedReportsRecyclerView.adapter?.notifyDataSetChanged()
+                            }
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e("DoctorMainActivity", "Error fetching patient details", e)
+                        }
+                }
+                doctorSubmittedReportsRecyclerView.adapter = SubmittedReportsAdapter(reportsList) { reportId ->
+                    val intent = Intent(this@DoctorMainActivity, DoctorCheckPatientReportActivity::class.java)
+                    intent.putExtra("REPORT_ID", reportId)
+                    startActivity(intent)
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.e("DoctorMainActivity", "Error fetching today's reports", exception)
+            }
+    }
+
 }
