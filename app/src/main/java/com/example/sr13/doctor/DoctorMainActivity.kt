@@ -9,6 +9,7 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.constraintlayout.utils.widget.ImageFilterView
 import com.bumptech.glide.Glide
+import com.example.sr13.LoginActivity
 import com.example.sr13.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -17,12 +18,14 @@ class DoctorMainActivity : AppCompatActivity() {
 
     //TODO: better looking layout
     //TODO: today's reports recycler view
+    // TODO: log out button
 
     private lateinit var doctorNameMain: TextView
     private lateinit var doctorRoleMain: TextView
     private lateinit var doctorProfilePicMain: ImageFilterView
     private lateinit var doctorSubmittedReportsRecyclerView: RecyclerView
     private lateinit var myPatientsBtn: Button
+    private lateinit var logoutBtn: Button
     private lateinit var auth: FirebaseAuth
     private lateinit var firestore: FirebaseFirestore
 
@@ -40,6 +43,7 @@ class DoctorMainActivity : AppCompatActivity() {
         doctorProfilePicMain = findViewById(R.id.patientProfilePicMain)
         doctorSubmittedReportsRecyclerView = findViewById(R.id.doctorTodaySubmittedReportsRecyclerView)
         myPatientsBtn = findViewById(R.id.myPatientsBtn)
+        logoutBtn = findViewById(R.id.logoutBtn)
 
         // Set up initial values or listeners here
         getDoctorData()
@@ -49,6 +53,12 @@ class DoctorMainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        logoutBtn.setOnClickListener {
+            auth.signOut()
+            val intent = Intent(this@DoctorMainActivity, LoginActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
     }
 
     private fun getDoctorData() {
