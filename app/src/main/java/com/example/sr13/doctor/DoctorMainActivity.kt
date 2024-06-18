@@ -22,9 +22,6 @@ import java.util.Locale
 
 class DoctorMainActivity : AppCompatActivity() {
 
-    //TODO: better looking layout
-    //TODO: today's reports recycler view
-
     private lateinit var doctorNameMain: TextView
     private lateinit var doctorRoleMain: TextView
     private lateinit var doctorProfilePicMain: ImageFilterView
@@ -138,7 +135,7 @@ class DoctorMainActivity : AppCompatActivity() {
                                 val fullName = "$firstName $lastName"
 
                                 val reportModel = SubmittedReportsViewModel(
-                                    R.drawable.ic_profile_icon,
+                                    R.drawable.ic_paper_icon,
                                     fullName,
                                     reportDate,
                                     reportId
