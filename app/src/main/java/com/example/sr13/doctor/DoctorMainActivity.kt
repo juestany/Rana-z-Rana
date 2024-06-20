@@ -30,6 +30,7 @@ class DoctorMainActivity : AppCompatActivity() {
     private lateinit var logoutBtn: Button
     private lateinit var auth: FirebaseAuth
     private lateinit var firestore: FirebaseFirestore
+    private lateinit var patientIds: List<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,7 +52,7 @@ class DoctorMainActivity : AppCompatActivity() {
         getDoctorData()
         setupRecyclerView()
 
-        myPatientsBtn.setOnClickListener() {
+        myPatientsBtn.setOnClickListener {
             val intent = Intent(this@DoctorMainActivity, DoctorMyPatientsActivity::class.java)
             startActivity(intent)
         }
@@ -76,9 +77,10 @@ class DoctorMainActivity : AppCompatActivity() {
                         val firstName = document.getString("firstName")
                         val lastName = document.getString("lastName")
                         val title = document.getString("title")
-                        val address = document.getString("adress") // Note: fixed typo to "address"
+                        val address = document.getString("address") // Fixed typo
                         val phoneNumber = document.getString("phoneNumber")
                         val imageUrl = document.getString("imageId")
+                        patientIds = document.get("patientIds") as List<String>? ?: listOf()
 
                         doctorNameMain.text = "$firstName $lastName"
                         doctorRoleMain.text = title
@@ -89,6 +91,9 @@ class DoctorMainActivity : AppCompatActivity() {
                         imageUrl?.let {
                             fetchImageFromFirebaseStorage(it)
                         }
+
+                        // Fetch today's reports after getting patient IDs
+                        fetchTodayReports()
                     } else {
                         Log.e("DoctorData", "Document does not exist")
                     }
@@ -108,7 +113,6 @@ class DoctorMainActivity : AppCompatActivity() {
 
     private fun setupRecyclerView() {
         doctorSubmittedReportsRecyclerView.layoutManager = LinearLayoutManager(this)
-        fetchTodayReports()
     }
 
     private fun fetchTodayReports() {
@@ -122,31 +126,33 @@ class DoctorMainActivity : AppCompatActivity() {
                 val reportsList = mutableListOf<SubmittedReportsViewModel>()
                 for (document in documents) {
                     val patientId = document.getString("userId") ?: ""
-                    val reportDate = document.getString("date") ?: ""
-                    val reportId = document.id
+                    if (patientIds.contains(patientId)) {
+                        val reportDate = document.getString("date") ?: ""
+                        val reportId = document.id
 
-                    firestore.collection("patient")
-                        .document(patientId)
-                        .get()
-                        .addOnSuccessListener { patientDocument ->
-                            if (patientDocument.exists()) {
-                                val firstName = patientDocument.getString("firstName") ?: ""
-                                val lastName = patientDocument.getString("lastName") ?: ""
-                                val fullName = "$firstName $lastName"
+                        firestore.collection("patient")
+                            .document(patientId)
+                            .get()
+                            .addOnSuccessListener { patientDocument ->
+                                if (patientDocument.exists()) {
+                                    val firstName = patientDocument.getString("firstName") ?: ""
+                                    val lastName = patientDocument.getString("lastName") ?: ""
+                                    val fullName = "$firstName $lastName"
 
-                                val reportModel = SubmittedReportsViewModel(
-                                    R.drawable.ic_paper_icon,
-                                    fullName,
-                                    reportDate,
-                                    reportId
-                                )
-                                reportsList.add(reportModel)
-                                doctorSubmittedReportsRecyclerView.adapter?.notifyDataSetChanged()
+                                    val reportModel = SubmittedReportsViewModel(
+                                        R.drawable.ic_paper_icon,
+                                        fullName,
+                                        reportDate,
+                                        reportId
+                                    )
+                                    reportsList.add(reportModel)
+                                    doctorSubmittedReportsRecyclerView.adapter?.notifyDataSetChanged()
+                                }
                             }
-                        }
-                        .addOnFailureListener { e ->
-                            Log.e("DoctorMainActivity", "Error fetching patient details", e)
-                        }
+                            .addOnFailureListener { e ->
+                                Log.e("DoctorMainActivity", "Error fetching patient details", e)
+                            }
+                    }
                 }
                 doctorSubmittedReportsRecyclerView.adapter = SubmittedReportsAdapter(reportsList) { reportId ->
                     val intent = Intent(this@DoctorMainActivity, DoctorCheckPatientReportActivity::class.java)

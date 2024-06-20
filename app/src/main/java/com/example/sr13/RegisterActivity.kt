@@ -1,9 +1,7 @@
 package com.example.sr13
 
-import android.content.Intent
 import android.os.Bundle
 import android.text.TextUtils
-import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -13,6 +11,7 @@ import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.FirebaseFirestore
 
 class RegisterActivity : BaseActivity() {
 
@@ -30,7 +29,6 @@ class RegisterActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.register)
 
-
         registerButton = findViewById(R.id.registerButton)
         inputEmail = findViewById(R.id.registerEmail)
         inputFirstName = findViewById(R.id.registerFirstName)
@@ -41,16 +39,11 @@ class RegisterActivity : BaseActivity() {
         inputPassword = findViewById(R.id.registerPassword)
         inputRepPass = findViewById(R.id.registerPassword2Repeat)
 
-
         registerButton?.setOnClickListener {
             registerDoctor()
         }
     }
 
-    /**
-     * Method to validate registration details.
-     * @return True if the details are valid, False otherwise.
-     */
     private fun validateRegisterDetails(): Boolean {
         return when {
             TextUtils.isEmpty(inputEmail?.text.toString().trim { it <= ' ' }) -> {
@@ -93,9 +86,6 @@ class RegisterActivity : BaseActivity() {
         }
     }
 
-    /**
-     * Method to register a new doctor.
-     */
     private fun registerDoctor() {
         if (validateRegisterDetails()) {
             showProgressDialog("Proszę czekać...")
@@ -109,17 +99,38 @@ class RegisterActivity : BaseActivity() {
 
                         if (task.isSuccessful) {
                             val firebaseUser: FirebaseUser = task.result!!.user!!
-
                             val doctor = Doctor(
-                                firebaseUser.uid,
-                                inputFirstName?.text.toString().trim { it <= ' ' },
-                                inputLastName?.text.toString().trim { it <= ' ' },
-                                inputPhoneNumber?.text.toString().trim { it <= ' ' },
-                                inputAddress?.text.toString().trim { it <= ' ' },
-                                inputTitle?.text.toString().trim { it <= ' ' }
+                                id = firebaseUser.uid,
+                                firstName = inputFirstName?.text.toString().trim { it <= ' ' },
+                                lastName = inputLastName?.text.toString().trim { it <= ' ' },
+                                phoneNumber = inputPhoneNumber?.text.toString().trim { it <= ' ' },
+                                address = inputAddress?.text.toString().trim { it <= ' ' },
+                                title = inputTitle?.text.toString().trim { it <= ' ' },
+                                imageId = "default_image_id",
+                                patientIds = listOf()  // Empty list for patient IDs initially
                             )
 
+                            // Save doctor details to Firestore
                             DoctorFirestoreDatabaseOperations().registerDoctor(this, doctor)
+
+                            // Save login details to the 'login' collection
+                            val loginDetails = hashMapOf(
+                                "email" to email,
+                                "password" to password,
+                                "role" to "lekarz"
+                            )
+
+                            FirebaseFirestore.getInstance().collection("login")
+                                .document(firebaseUser.uid)
+                                .set(loginDetails)
+                                .addOnSuccessListener {
+                                    userRegistrationSuccess()
+                                }
+                                .addOnFailureListener { e ->
+                                    hideProgressDialog()
+                                    showErrorSnackBar("Błąd rejestracji: ${e.message}", true)
+                                }
+
                         } else {
                             hideProgressDialog()
                             showErrorSnackBar(task.exception!!.message.toString(), true)
@@ -128,10 +139,10 @@ class RegisterActivity : BaseActivity() {
         }
     }
 
-    /**
-     * Method called after successful registration.
-     */
     fun userRegistrationSuccess() {
+        hideProgressDialog()
         Toast.makeText(this@RegisterActivity, "Rejestracja zakończona sukcesem.", Toast.LENGTH_LONG).show()
+        FirebaseAuth.getInstance().signOut()
+        finish()
     }
 }
