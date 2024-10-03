@@ -142,7 +142,7 @@ class DoctorAddPatientActivity : AppCompatActivity() {
             imagesRef.downloadUrl
         }.addOnCompleteListener { task ->
             if (task.isSuccessful) {
-                patient.imageiD = imageId
+                patient.imageId = imageId
                 addPatientToFirestore(patient)
                 savePatientLogin(email, password, "pacjent")
                 navigateToSuccessScreen(email, password)

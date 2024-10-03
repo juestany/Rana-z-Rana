@@ -7,7 +7,7 @@ data class Patient(
     var id: String="",
 
     @PropertyName("imageId")
-    var imageiD: String="",
+    var imageId: String="",
 
     @PropertyName("firstName")
     var firstName: String="",
@@ -32,4 +32,5 @@ data class Patient(
 
     @PropertyName("doctorId")
     var doctorId: String=""
-)
+) {
+}

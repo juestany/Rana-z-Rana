@@ -9,6 +9,7 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.constraintlayout.utils.widget.ImageFilterView
 import com.bumptech.glide.Glide
+import com.example.sr13.LoginActivity
 import com.example.sr13.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -19,9 +20,9 @@ class PatientMainActivity : AppCompatActivity() {
     private lateinit var patientRoleMain: TextView
     private lateinit var patientProfilePicMain: ImageFilterView
     private lateinit var patientSubmitReportBtn: Button
-    private lateinit var patientSubmittedReportsRecyclerView: RecyclerView
     private lateinit var auth: FirebaseAuth
     private lateinit var firestore: FirebaseFirestore
+    private lateinit var logoutBtn: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,8 +36,8 @@ class PatientMainActivity : AppCompatActivity() {
         patientNameMain = findViewById(R.id.patientNameMain)
         patientRoleMain = findViewById(R.id.doctorRoleMain)
         patientProfilePicMain = findViewById(R.id.patientProfilePicMain)
-        patientSubmitReportBtn = findViewById(R.id.myPatientsBtn)
-        patientSubmittedReportsRecyclerView = findViewById(R.id.patientSubmittedReportsRecyclerView)
+        patientSubmitReportBtn = findViewById(R.id.addReportBtn)
+        logoutBtn = findViewById(R.id.logoutBtn)
 
         // Set up initial values or listeners here
         getPatientData()
@@ -48,6 +49,12 @@ class PatientMainActivity : AppCompatActivity() {
 
         }
 
+        logoutBtn.setOnClickListener {
+            auth.signOut()
+            val intent = Intent(this@PatientMainActivity, LoginActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
     }
 
     private fun getPatientData() {

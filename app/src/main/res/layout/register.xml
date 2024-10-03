@@ -17,9 +17,9 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="64dp"
-            android:layout_marginBottom="42dp"
-            android:gravity="center"/>
+            android:layout_marginTop="44dp"
+            android:gravity="center"
+            app:layout_constraintHorizontal_bias="0.496" />
 
     <EditText
             android:id="@+id/registerFirstName"
