@@ -26,6 +26,7 @@ class DoctorCheckPatientActivity : AppCompatActivity() {
     private lateinit var patientProfilePic: ImageView
     private lateinit var recyclerView: RecyclerView
     private lateinit var reportsAdapter: SubmittedReportsAdapter
+    private lateinit var goToChatBtn: Button
     private val reportsList = mutableListOf<SubmittedReportsViewModel>()
 
     private var patientId: String? = null
@@ -38,6 +39,8 @@ class DoctorCheckPatientActivity : AppCompatActivity() {
         patientNameMain = findViewById(R.id.patientNameMain)
         patientProfilePic = findViewById(R.id.patientProfilePicMain)
         removePatientBtn = findViewById(R.id.removePatientBtn)
+        goToChatBtn = findViewById(R.id.patientChatBtn)
+
         recyclerView = findViewById(R.id.patientSubmittedReportsRecyclerView)
         firestore = FirebaseFirestore.getInstance()
 
@@ -62,6 +65,10 @@ class DoctorCheckPatientActivity : AppCompatActivity() {
             patientId?.let { id ->
                 removePatientFromDatabase(id)
             }
+        }
+
+        goToChatBtn.setOnClickListener {
+
         }
     }
 
@@ -136,6 +143,7 @@ class DoctorCheckPatientActivity : AppCompatActivity() {
             .whereEqualTo("userId", patientId)
             .get()
             .addOnSuccessListener { documents ->
+                reportsList.clear() // Clear the list before adding new data
                 for (document in documents) {
                     val report = document.toObject(Report::class.java)
                     // Fetch patient details
@@ -153,7 +161,12 @@ class DoctorCheckPatientActivity : AppCompatActivity() {
                                     report.reportId
                                 )
                                 reportsList.add(reportModel)
-                                reportsAdapter.notifyDataSetChanged()
+
+                                // Sort the list by date before updating the adapter
+                                val sortedReportsList = reportsList.sortedByDescending { it.getFormattedDate() }
+
+                                // Update the adapter with the sorted list
+                                reportsAdapter.updateList(sortedReportsList)
                             }
                         }
                         .addOnFailureListener { e ->

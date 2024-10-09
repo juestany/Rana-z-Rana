@@ -23,6 +23,8 @@ class LoginActivity : BaseActivity(), View.OnClickListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.login)
 
+//        SendBird.init("APP_ID_HERE", this)
+
         inputEmail = findViewById(R.id.loginEmail)
         inputPassword = findViewById(R.id.loginPassword)
         loginButton = findViewById(R.id.loginButton)
