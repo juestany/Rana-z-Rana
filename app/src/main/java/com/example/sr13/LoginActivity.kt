@@ -9,8 +9,13 @@ import android.widget.Button
 import android.widget.EditText
 import com.example.sr13.doctor.DoctorMainActivity
 import com.example.sr13.patient.PatientMainActivity
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.auth
+import com.google.firebase.database.database
+import com.google.firebase.firestore.BuildConfig
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.storage
 
 class LoginActivity : BaseActivity(), View.OnClickListener {
     private var inputEmail: EditText? = null
@@ -23,7 +28,15 @@ class LoginActivity : BaseActivity(), View.OnClickListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.login)
 
-//        SendBird.init("APP_ID_HERE", this)
+        // When running in debug mode, connect to the Firebase Emulator Suite.
+        // "10.0.2.2" is a special IP address which allows the Android Emulator
+        // to connect to "localhost" on the host computer. The port values (9xxx)
+        // must match the values defined in the firebase.json file.
+        if (BuildConfig.DEBUG) {
+            Firebase.database.useEmulator("10.0.2.2", 9000)
+            Firebase.auth.useEmulator("10.0.2.2", 9099)
+            Firebase.storage.useEmulator("10.0.2.2", 9199)
+        }
 
         inputEmail = findViewById(R.id.loginEmail)
         inputPassword = findViewById(R.id.loginPassword)
