@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -19,9 +21,10 @@ class ChatActivity : AppCompatActivity() {
     private lateinit var chatRoomId: String
     private lateinit var firestore: FirebaseFirestore
     private lateinit var messagesRecyclerView: RecyclerView
-    private lateinit var messageAdapter: MessageAdapter // Assuming you have a MessageAdapter class
+    private lateinit var messageAdapter: MessageAdapter
     private lateinit var sendMessageButton: Button
     private lateinit var messageInput: EditText
+    private lateinit var participantNameTextView: TextView // Reference to the participant name TextView
 
     private val messagesList = mutableListOf<Message>()
 
@@ -35,6 +38,11 @@ class ChatActivity : AppCompatActivity() {
         messagesRecyclerView = findViewById(R.id.messagesRecyclerView)
         sendMessageButton = findViewById(R.id.sendMessageButton)
         messageInput = findViewById(R.id.messageInput)
+        participantNameTextView = findViewById(R.id.participantNameTextView)
+
+        // Set the participant's name
+        val participantName = intent.getStringExtra("PARTICIPANT_NAME") ?: "Unknown"
+        participantNameTextView.text = participantName
 
         messageAdapter = MessageAdapter(messagesList)
         messagesRecyclerView.adapter = messageAdapter
@@ -73,13 +81,17 @@ class ChatActivity : AppCompatActivity() {
 
     private fun sendMessage() {
         val messageText = messageInput.text.toString()
-        if (messageText.isNotEmpty()) {
+        val senderId = FirebaseAuth.getInstance().currentUser?.uid
+
+        if (messageText.isNotEmpty() && senderId != null) { // Check if message is not empty and senderId is not null
+            // Create a message data map
             val messageData = hashMapOf(
-                "senderId" to FirebaseAuth.getInstance().currentUser?.uid,
+                "senderId" to senderId,
                 "message" to messageText,
-                "timestamp" to FieldValue.serverTimestamp()
+                "timestamp" to FieldValue.serverTimestamp() // Use Firestore's server timestamp
             )
 
+            // Add the message to Firestore
             firestore.collection("chats")
                 .document(chatRoomId)
                 .collection("messages")
@@ -89,8 +101,13 @@ class ChatActivity : AppCompatActivity() {
                     messageInput.text.clear()
                 }
                 .addOnFailureListener { e ->
-                    // Handle any errors
+                    // Handle any errors, e.g. log or show a Toast
+                    Log.e("ChatActivity", "Error sending message: ${e.message}")
+                    Toast.makeText(this, "Error sending message", Toast.LENGTH_SHORT).show()
                 }
+        } else {
+            // Optionally, you can show a message to the user if the input is empty or user is not authenticated
+            Toast.makeText(this, "Please enter a message", Toast.LENGTH_SHORT).show()
         }
     }
 }

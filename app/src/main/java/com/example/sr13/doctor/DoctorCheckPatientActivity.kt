@@ -75,8 +75,8 @@ class DoctorCheckPatientActivity : AppCompatActivity() {
 
     private fun checkIfChatRoomExists() {
         val chatsRef = FirebaseFirestore.getInstance().collection("chats")
-        doctorId?.let {
-            chatsRef.whereArrayContains("participants", it)
+        doctorId?.let { docId ->
+            chatsRef.whereArrayContains("participants", docId)
                 .get()
                 .addOnSuccessListener { documents ->
                     var chatRoomExists = false
@@ -86,26 +86,56 @@ class DoctorCheckPatientActivity : AppCompatActivity() {
                             // Chat room already exists, open this conversation
                             chatRoomExists = true
                             val chatRoomId = document.id
-                            // Open com.example.sr13.doctor.ChatActivity with this chatRoomId
-                            openChat(chatRoomId)
+                            // Load participant's name before opening the chat
+                            loadPatientNameAndOpenChat(chatRoomId)
                             break
                         }
                     }
                     if (!chatRoomExists) {
                         // No existing chat room, create a new one
-                        patientId?.let { it1 -> createChatRoom(doctorId!!, it1) }
+                        patientId?.let { id ->
+                            loadPatientNameAndCreateChatRoom(id)
+                        }
                     }
                 }
         }
     }
 
-    private fun openChat(chatRoomId: String) {
-        val intent = Intent(this, ChatActivity::class.java)
-        intent.putExtra("CHAT_ROOM_ID", chatRoomId) // Pass the chatRoomId to the com.example.sr13.doctor.ChatActivity
-        startActivity(intent)
+    private fun loadPatientNameAndCreateChatRoom(patientId: String) {
+        firestore.collection("patient")
+            .document(patientId)
+            .get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val patient = document.toObject(Patient::class.java)
+                    val fullName = "${patient?.firstName} ${patient?.lastName}"
+                    createChatRoom(doctorId!!, patientId, fullName) // Pass the participant's name
+                }
+            }
+            .addOnFailureListener { e ->
+                // Handle any errors while fetching patient details
+            }
     }
 
-    private fun createChatRoom(doctorId: String, patientId: String) {
+    private fun loadPatientNameAndOpenChat(chatRoomId: String) {
+        patientId?.let { id ->
+            firestore.collection("patient")
+                .document(id)
+                .get()
+                .addOnSuccessListener { document ->
+                    if (document.exists()) {
+                        val patient = document.toObject(Patient::class.java)
+                        val participantName = "${patient?.firstName} ${patient?.lastName}"
+                        openChat(chatRoomId, participantName) // Now calling openChat with participant's name
+                    }
+                }
+                .addOnFailureListener { e ->
+                    // Handle any errors while fetching patient details
+                }
+        }
+    }
+
+    private fun createChatRoom(doctorId: String, patientId: String, participantName: String) {
         val chatRoomData = hashMapOf(
             "participants" to listOf(doctorId, patientId),
             "lastMessage" to "",
@@ -115,9 +145,16 @@ class DoctorCheckPatientActivity : AppCompatActivity() {
         val chatsRef = FirebaseFirestore.getInstance().collection("chats")
         chatsRef.add(chatRoomData).addOnSuccessListener { documentReference ->
             val chatRoomId = documentReference.id
-            // Navigate to the chat screen with chatRoomId
-            openChat(chatRoomId)
+            // Navigate to the chat screen with chatRoomId and participant's name
+            openChat(chatRoomId, participantName)
         }
+    }
+
+    private fun openChat(chatRoomId: String, participantName: String) {
+        val intent = Intent(this, ChatActivity::class.java)
+        intent.putExtra("CHAT_ROOM_ID", chatRoomId) // Pass the chatRoomId to the ChatActivity
+        intent.putExtra("PARTICIPANT_NAME", participantName) // Pass the participant's name here
+        startActivity(intent)
     }
 
     private fun loadPatientData(patientId: String) {

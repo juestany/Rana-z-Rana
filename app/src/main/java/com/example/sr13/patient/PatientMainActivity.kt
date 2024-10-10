@@ -23,6 +23,7 @@ class PatientMainActivity : AppCompatActivity() {
     private lateinit var patientProfilePicMain: ImageFilterView
     private lateinit var patientSubmitReportBtn: Button
     private lateinit var goToChatBtn: Button
+    private lateinit var participantNameTextView: TextView // Reference to the existing TextView for the doctor's name
 
     private lateinit var auth: FirebaseAuth
     private lateinit var firestore: FirebaseFirestore
@@ -51,7 +52,6 @@ class PatientMainActivity : AppCompatActivity() {
         patientSubmitReportBtn.setOnClickListener {
             val intent = Intent(this@PatientMainActivity, PatientAddReportActivity::class.java)
             startActivity(intent)
-
         }
 
         logoutBtn.setOnClickListener {
@@ -66,9 +66,10 @@ class PatientMainActivity : AppCompatActivity() {
         }
     }
 
-    private fun openChat(chatRoomId: String) {
+    private fun openChat(chatRoomId: String, participantName: String) {
         val intent = Intent(this@PatientMainActivity, ChatActivity::class.java)
         intent.putExtra("CHAT_ROOM_ID", chatRoomId)
+        intent.putExtra("PARTICIPANT_NAME", participantName) // Pass the doctor's name to the ChatActivity
         startActivity(intent)
     }
 
@@ -82,7 +83,9 @@ class PatientMainActivity : AppCompatActivity() {
         val chatsRef = FirebaseFirestore.getInstance().collection("chats")
         chatsRef.add(chatRoomData).addOnSuccessListener { documentReference ->
             val chatRoomId = documentReference.id
-            openChat(chatRoomId)
+            fetchDoctorName(doctorId) { fullName ->
+                openChat(chatRoomId, fullName) // Pass the full name when opening the chat
+            }
         }
     }
 
@@ -106,7 +109,9 @@ class PatientMainActivity : AppCompatActivity() {
                                 // Chat room exists, open this conversation
                                 chatRoomExists = true
                                 val chatRoomId = document.id
-                                openChat(chatRoomId)
+                                fetchDoctorName(doctorId) { fullName ->
+                                    openChat(chatRoomId, fullName) // Pass the full name when opening the chat
+                                }
                                 break
                             }
                         }
@@ -119,7 +124,6 @@ class PatientMainActivity : AppCompatActivity() {
     }
 
     private fun getPatientData() {
-        val user = FirebaseAuth.getInstance().currentUser
         val userId = auth.currentUser?.uid
 
         userId?.let { uid ->
@@ -130,13 +134,14 @@ class PatientMainActivity : AppCompatActivity() {
                     if (document != null) {
                         val firstName = document.getString("firstName")
                         val lastName = document.getString("lastName")
-                        val phoneNumber = document.getString("phoneNumber")
                         val imageUrl = document.getString("imageId")
+                        val doctorId = document.getString("doctorId") // Get the doctor's ID
 
+                        // Set patient name
                         patientNameMain.text = "$firstName $lastName"
                         patientRoleMain.text = "Pacjent"
 
-                        Log.d("PatientData", "Fetched imageUrl: $imageUrl")
+                        // Load patient profile picture
                         imageUrl?.let {
                             fetchImageFromFirebaseStorage(it)
                         }
@@ -148,6 +153,27 @@ class PatientMainActivity : AppCompatActivity() {
                     Log.e("PatientData", "Error fetching patient data", exception)
                 }
         }
+    }
+
+    private fun fetchDoctorName(doctorId: String, callback: (String) -> Unit) {
+        firestore.collection("doctor")
+            .document(doctorId)
+            .get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val doctorFirstName = document.getString("firstName") ?: ""
+                    val doctorLastName = document.getString("lastName") ?: ""
+                    val fullDoctorName = "$doctorFirstName $doctorLastName"
+                    callback(fullDoctorName) // Pass the full name back via the callback
+                } else {
+                    Log.e("DoctorData", "Doctor document does not exist")
+                    callback("Unknown Doctor") // Handle unknown doctor case
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.e("DoctorData", "Error fetching doctor data", exception)
+                callback("Unknown Doctor") // Handle failure case
+            }
     }
 
     private fun fetchImageFromFirebaseStorage(imageUrl: String) {
