@@ -16,6 +16,7 @@ import com.example.sr13.firestore.Doctor
 import com.example.sr13.firestore.Patient
 import com.example.sr13.firestore.Report
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 
 class DoctorCheckPatientActivity : AppCompatActivity() {
@@ -68,11 +69,11 @@ class DoctorCheckPatientActivity : AppCompatActivity() {
         }
 
         goToChatBtn.setOnClickListener {
-            goToChatRoomWithPatient()
+            checkIfChatRoomExists()
         }
     }
 
-    private fun goToChatRoomWithPatient() {
+    private fun checkIfChatRoomExists() {
         val chatsRef = FirebaseFirestore.getInstance().collection("chats")
         doctorId?.let {
             chatsRef.whereArrayContains("participants", it)
@@ -85,22 +86,38 @@ class DoctorCheckPatientActivity : AppCompatActivity() {
                             // Chat room already exists, open this conversation
                             chatRoomExists = true
                             val chatRoomId = document.id
-                            println("ChatRoom exists. Everything works.")
-                            // Open ChatActivity with this chatRoomId
-//                            openChat(chatRoomId)
+                            // Open com.example.sr13.doctor.ChatActivity with this chatRoomId
+                            openChat(chatRoomId)
                             break
                         }
                     }
                     if (!chatRoomExists) {
                         // No existing chat room, create a new one
-                        createChatRoom(doctorId, patientId)
+                        patientId?.let { it1 -> createChatRoom(doctorId!!, it1) }
                     }
                 }
         }
     }
 
-    private fun createChatRoom(doctorId: String?, patientId: String?) {
+    private fun openChat(chatRoomId: String) {
+        val intent = Intent(this, ChatActivity::class.java)
+        intent.putExtra("CHAT_ROOM_ID", chatRoomId) // Pass the chatRoomId to the com.example.sr13.doctor.ChatActivity
+        startActivity(intent)
+    }
 
+    private fun createChatRoom(doctorId: String, patientId: String) {
+        val chatRoomData = hashMapOf(
+            "participants" to listOf(doctorId, patientId),
+            "lastMessage" to "",
+            "lastUpdated" to FieldValue.serverTimestamp()
+        )
+
+        val chatsRef = FirebaseFirestore.getInstance().collection("chats")
+        chatsRef.add(chatRoomData).addOnSuccessListener { documentReference ->
+            val chatRoomId = documentReference.id
+            // Navigate to the chat screen with chatRoomId
+            openChat(chatRoomId)
+        }
     }
 
     private fun loadPatientData(patientId: String) {
