@@ -12,9 +12,11 @@ import com.example.sr13.patient.PatientMainActivity
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.database
 import com.google.firebase.firestore.BuildConfig
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.storage
 
 class LoginActivity : BaseActivity(), View.OnClickListener {
@@ -33,9 +35,9 @@ class LoginActivity : BaseActivity(), View.OnClickListener {
         // to connect to "localhost" on the host computer. The port values (9xxx)
         // must match the values defined in the firebase.json file.
         if (BuildConfig.DEBUG) {
-            Firebase.database.useEmulator("10.0.2.2", 9000)
-            Firebase.auth.useEmulator("10.0.2.2", 9099)
-            Firebase.storage.useEmulator("10.0.2.2", 9199)
+            FirebaseDatabase.getInstance().useEmulator("10.0.2.2", 9003)
+            FirebaseAuth.getInstance().useEmulator("10.0.2.2", 9099)
+            FirebaseStorage.getInstance().useEmulator("10.0.2.2", 9199)
         }
 
         inputEmail = findViewById(R.id.loginEmail)

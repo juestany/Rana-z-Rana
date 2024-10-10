@@ -1,4 +1,9 @@
-09:50:20.179 [NamespaceSystem-akka.actor.default-dispatcher-4] INFO akka.event.slf4j.Slf4jLogger - Slf4jLogger started
-09:50:20.307 [main] INFO com.firebase.server.forge.App$ - Listening at 127.0.0.1:9001
-09:50:25.842 [NamespaceSystem-akka.actor.default-dispatcher-4] INFO com.firebase.core.namespace.NamespaceActor - fir-zpo-default-rtdb successfully activated FBKV (SurveyIdle(0)) wait: 96ms, init: 0ms
-09:50:25.890 [NamespaceSystem-blocking-namespace-operation-dispatcher-6] INFO com.firebase.core.namespace.StateManager - Namespace fir-zpo-default-rtdb status Active to Active
+17:55:16.083 [NamespaceSystem-akka.actor.default-dispatcher-4] INFO akka.event.slf4j.Slf4jLogger - Slf4jLogger started
+17:55:16.218 [main] INFO com.firebase.server.forge.App$ - Listening at 127.0.0.1:9003
+17:55:21.784 [NamespaceSystem-akka.actor.default-dispatcher-4] INFO com.firebase.core.namespace.NamespaceActor - fir-zpo-default-rtdb successfully activated FBKV (SurveyIdle(0)) wait: 110ms, init: 0ms
+17:55:21.829 [NamespaceSystem-blocking-namespace-operation-dispatcher-6] INFO com.firebase.core.namespace.StateManager - Namespace fir-zpo-default-rtdb status Active to Active
+17:55:43.885 [FirebaseWorkerPool-1-4] WARN com.firebase.core.persistence.backend.dummy.EmulatorMetadataPersistence - Multiple projectIds are not recommended in single project mode. Requested 
+namespace fir-zpo, but the emulator is configured for fir-zpo-default-rtdb. To 
+opt-out of single project mode add/set the singleProjectMode: false property in 
+the firebase.json emulators config. 
+17:55:43.897 [NamespaceSystem-akka.actor.default-dispatcher-9] INFO com.firebase.core.namespace.NamespaceActor - fir-zpo successfully activated FBKV (SurveyIdle(0)) wait: 3ms, init: 0ms

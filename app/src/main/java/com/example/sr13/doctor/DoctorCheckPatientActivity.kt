@@ -68,8 +68,39 @@ class DoctorCheckPatientActivity : AppCompatActivity() {
         }
 
         goToChatBtn.setOnClickListener {
-
+            goToChatRoomWithPatient()
         }
+    }
+
+    private fun goToChatRoomWithPatient() {
+        val chatsRef = FirebaseFirestore.getInstance().collection("chats")
+        doctorId?.let {
+            chatsRef.whereArrayContains("participants", it)
+                .get()
+                .addOnSuccessListener { documents ->
+                    var chatRoomExists = false
+                    for (document in documents) {
+                        val participants = document.get("participants") as List<*>
+                        if (participants.contains(patientId)) {
+                            // Chat room already exists, open this conversation
+                            chatRoomExists = true
+                            val chatRoomId = document.id
+                            println("ChatRoom exists. Everything works.")
+                            // Open ChatActivity with this chatRoomId
+//                            openChat(chatRoomId)
+                            break
+                        }
+                    }
+                    if (!chatRoomExists) {
+                        // No existing chat room, create a new one
+                        createChatRoom(doctorId, patientId)
+                    }
+                }
+        }
+    }
+
+    private fun createChatRoom(doctorId: String?, patientId: String?) {
+
     }
 
     private fun loadPatientData(patientId: String) {
