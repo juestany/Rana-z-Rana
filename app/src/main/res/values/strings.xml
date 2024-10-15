@@ -15,5 +15,6 @@
     <string name="err_msg_password_mismatch">Passwords mismatch</string>
     <string name="login_successful">You are logged in successfully</string>
     <string name="register_success">You have been successfully registered.\n</string>
+    <string name="google_maps_key">AIzaSyCcRzRGfnozt57TuI03DIe_PyfqSfwjwrg</string>
 
 </resources>

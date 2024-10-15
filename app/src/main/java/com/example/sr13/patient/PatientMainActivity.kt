@@ -11,10 +11,15 @@ import androidx.constraintlayout.utils.widget.ImageFilterView
 import com.bumptech.glide.Glide
 import com.example.sr13.LoginActivity
 import com.example.sr13.R
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
-class PatientMainActivity : AppCompatActivity() {
+class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var patientNameMain: TextView
     private lateinit var patientRoleMain: TextView
@@ -23,6 +28,7 @@ class PatientMainActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
     private lateinit var firestore: FirebaseFirestore
     private lateinit var logoutBtn: Button
+    private lateinit var mMap: GoogleMap
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -93,5 +99,13 @@ class PatientMainActivity : AppCompatActivity() {
         Glide.with(this)
             .load(imageUrl)
             .into(patientProfilePicMain)
+    }
+
+    override fun onMapReady(googleMap: GoogleMap) {
+        mMap = googleMap
+
+        val defaultLocation = LatLng(-33.852, 151.211)
+        mMap.addMarker(MarkerOptions().position(defaultLocation).title("Default Location"))
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, 10f))
     }
 }

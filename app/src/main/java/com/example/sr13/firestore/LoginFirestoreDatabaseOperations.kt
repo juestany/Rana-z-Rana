@@ -13,7 +13,7 @@ import kotlinx.coroutines.tasks.await
  *
  * @property db - Referencja do obiektu FirebaseFirestore, służąca do interakcji z bazą danych Firestore.
  */
-class LoginFirestoreDatabaseOperations() : LoginFirestoreInterface {
+abstract class LoginFirestoreDatabaseOperations() : LoginFirestoreInterface {
 
     private val mFireStore = FirebaseFirestore.getInstance()
     /**

@@ -33,7 +33,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
-            android:layout_marginTop="16dp"/>
+            android:layout_marginTop="16dp" />
 
     <EditText
             android:id="@+id/registerLastName"
@@ -47,7 +47,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
-            android:layout_marginTop="16dp"/>
+            android:layout_marginTop="16dp" />
 
     <EditText
             android:id="@+id/registerEmail"
@@ -61,7 +61,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
-            android:layout_marginTop="16dp"/>
+            android:layout_marginTop="16dp" />
 
     <EditText
             android:id="@+id/registerPhoneNumber"
@@ -75,21 +75,34 @@
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
-            android:layout_marginTop="16dp"/>
+            android:layout_marginTop="16dp" />
 
+    <!-- Add this EditText for the address -->
     <EditText
             android:id="@+id/registerAddress"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:hint="Adres"
-            android:inputType="textPostalAddress"
+            android:inputType="text"
             android:textColor="#000000"
             app:layout_constraintTop_toBottomOf="@+id/registerPhoneNumber"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
-            android:layout_marginTop="16dp"/>
+            android:layout_marginTop="16dp" />
+
+    <Button
+            android:id="@+id/openMapButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Wybierz lokalizację"
+            app:layout_constraintTop_toBottomOf="@id/registerAddress"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="16dp" />
 
     <EditText
             android:id="@+id/registerTitle"
@@ -98,12 +111,12 @@
             android:hint="Tytuł"
             android:inputType="text"
             android:textColor="#000000"
-            app:layout_constraintTop_toBottomOf="@+id/registerAddress"
+            app:layout_constraintTop_toBottomOf="@+id/openMapButton"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
-            android:layout_marginTop="16dp"/>
+            android:layout_marginTop="16dp" />
 
     <EditText
             android:id="@+id/registerPassword"
@@ -117,7 +130,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
-            android:layout_marginTop="16dp"/>
+            android:layout_marginTop="16dp" />
 
     <EditText
             android:id="@+id/registerPassword2Repeat"
@@ -131,7 +144,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
-            android:layout_marginTop="16dp"/>
+            android:layout_marginTop="16dp" />
 
     <Button
             android:id="@+id/registerButton"
@@ -145,5 +158,5 @@
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
-            android:layout_marginTop="32dp"/>
+            android:layout_marginTop="32dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>
