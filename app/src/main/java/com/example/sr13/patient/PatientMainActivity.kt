@@ -168,16 +168,30 @@ class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
         firestore.collection("doctor").document(doctorId).get()
             .addOnSuccessListener { document ->
                 if (document != null) {
-                    val lat = document.getDouble("lat")
-                    val lng = document.getDouble("lng")
-                    if (lat != null && lng != null) {
-                        doctorLocation = LatLng(lat, lng)
+                    val doctorAddress = document.getString("adress")
+
+                    if (doctorAddress != null) {
+                        geocodeDoctorAddress(doctorAddress)
                     }
                 }
             }
             .addOnFailureListener { e ->
                 Log.e("Firestore", "Error fetching doctor location", e)
             }
+    }
+
+    private fun geocodeDoctorAddress(address: String) {
+        val geocoder = Geocoder(this, Locale.getDefault())
+        val addresses = geocoder.getFromLocationName(address, 1)
+
+        if (addresses != null && addresses.isNotEmpty()) {
+            val location = addresses[0]
+            doctorLocation = LatLng(location.latitude, location.longitude)
+
+            Log.d("Geocode", "Doctor location: ${doctorLocation?.latitude}, ${doctorLocation?.longitude}")
+        } else {
+            Log.e("Geocode", "No coordinates found for address: $address")
+        }
     }
 
     private fun geocodeAddressAndCalculateRoute(address: String) {
@@ -191,11 +205,14 @@ class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun calculateRouteToDoctor(currentLatLng: LatLng) {
-        // Używamy lokalizacji GPS pacjenta do wyznaczenia trasy
-        val uri = Uri.parse("https://www.google.com/maps/dir/?api=1&origin=${currentLatLng.latitude},${currentLatLng.longitude}&destination=${doctorLocation?.latitude},${doctorLocation?.longitude}&travelmode=driving")
-        val intent = Intent(Intent.ACTION_VIEW, uri)
-        intent.setPackage("com.google.android.apps.maps")
-        startActivity(intent)
+        if (doctorLocation != null) {
+            val uri = Uri.parse("https://www.google.com/maps/dir/?api=1&origin=${currentLatLng.latitude},${currentLatLng.longitude}&destination=${doctorLocation?.latitude},${doctorLocation?.longitude}&travelmode=driving")
+            val intent = Intent(Intent.ACTION_VIEW, uri)
+            intent.setPackage("com.google.android.apps.maps")
+            startActivity(intent)
+        } else {
+            Log.e("RouteError", "Doctor location is not available for routing")
+        }
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
