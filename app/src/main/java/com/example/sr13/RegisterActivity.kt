@@ -40,29 +40,25 @@ class RegisterActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.register)
 
-        // Initialize Google Places API
         if (!Places.isInitialized()) {
             Places.initialize(applicationContext, getString(R.string.google_maps_key))
         }
 
-        // Bind views
         registerButton = findViewById(R.id.registerButton)
         openMapButton = findViewById(R.id.openMapButton)
         inputEmail = findViewById(R.id.registerEmail)
         inputFirstName = findViewById(R.id.registerFirstName)
         inputLastName = findViewById(R.id.registerLastName)
         inputPhoneNumber = findViewById(R.id.registerPhoneNumber)
-        inputAddress = findViewById(R.id.registerAddress) // Upewnij się, że to pole jest w układzie
+        inputAddress = findViewById(R.id.registerAddress)
         inputTitle = findViewById(R.id.registerTitle)
         inputPassword = findViewById(R.id.registerPassword)
         inputRepPass = findViewById(R.id.registerPassword2Repeat)
 
-        // Open place picker
         openMapButton.setOnClickListener {
             openPlacePicker()
         }
 
-        // Register doctor
         registerButton.setOnClickListener {
             registerDoctor()
         }
@@ -81,7 +77,7 @@ class RegisterActivity : BaseActivity() {
             when (resultCode) {
                 Activity.RESULT_OK -> {
                     val place = Autocomplete.getPlaceFromIntent(data!!)
-                    inputAddress.setText(place.address)  // Ustaw wybrany adres
+                    inputAddress.setText(place.address)
                 }
                 AutocompleteActivity.RESULT_ERROR -> {
                     val status: Status = Autocomplete.getStatusFromIntent(data!!)

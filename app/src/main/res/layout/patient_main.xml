@@ -69,7 +69,19 @@
             app:layout_constraintTop_toBottomOf="@id/addReportBtn"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toTopOf="@+id/logoutBtn" />
+            app:layout_constraintBottom_toTopOf="@+id/znajdzLekarza" />
+
+    <Button
+            android:id="@+id/znajdzLekarza"
+            android:layout_width="343dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="34dp"
+            android:layout_marginBottom="76dp"
+            android:text="Znajdź drogę do lekarza"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.081"
+            app:layout_constraintStart_toStartOf="parent" />
 
     <Button
             android:id="@+id/logoutBtn"
