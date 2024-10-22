@@ -28,6 +28,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.*
@@ -183,7 +184,7 @@ class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
             }
     }
 
-    private fun geocodeDoctorAddress(address: String) {
+    private fun geocodeDoctorAddress(address: String, retryCount: Int = 10) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val geocoder = Geocoder(this@PatientMainActivity, Locale.getDefault())
@@ -198,6 +199,10 @@ class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
                 }
             } catch (e: Exception) {
                 Log.e("Geocode", "Error geocoding address: $address", e)
+                if (retryCount > 0) {
+                    delay(9000)
+                    geocodeDoctorAddress(address, retryCount - 1)
+                }
             }
         }
     }
@@ -205,6 +210,7 @@ class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
     private fun geocodeAddressAndCalculateRoute(address: String) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
+                Log.e("LOKALIZACJA LEKARZA 2", "LOKALIZACJA LEKARZA 2: $doctorLocation")
                 val geocoder = Geocoder(this@PatientMainActivity, Locale.getDefault())
                 val addresses = geocoder.getFromLocationName(address, 1)
                 if (addresses != null && addresses.isNotEmpty()) {
