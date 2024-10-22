@@ -26,6 +26,10 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.*
 
 class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -89,7 +93,7 @@ class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
     private fun requestLocationUpdates() {
         val locationRequest = LocationRequest.create().apply {
             interval = 10000
-            fastestInterval = 5000
+            fastestInterval = 5000000
             priority = LocationRequest.PRIORITY_HIGH_ACCURACY
         }
 
@@ -130,7 +134,6 @@ class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
                         val doctorId = document.getString("doctorId")
                         Log.e("SPRAWDZENIE 2", "ADRES UYZTKOWNIKA: ${patientAddress}")
 
-
                         patientNameMain.text = "$firstName $lastName"
                         patientRoleMain.text = "Pacjent"
 
@@ -169,7 +172,7 @@ class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
             .addOnSuccessListener { document ->
                 if (document != null) {
                     val doctorAddress = document.getString("adress")
-
+                    Log.e("SPRAWDZENIE LEKARZA", "SPRAWDZENIE LOKALIZACJI 1: $doctorAddress")
                     if (doctorAddress != null) {
                         geocodeDoctorAddress(doctorAddress)
                     }
@@ -181,30 +184,45 @@ class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private fun geocodeDoctorAddress(address: String) {
-        val geocoder = Geocoder(this, Locale.getDefault())
-        val addresses = geocoder.getFromLocationName(address, 1)
-
-        if (addresses != null && addresses.isNotEmpty()) {
-            val location = addresses[0]
-            doctorLocation = LatLng(location.latitude, location.longitude)
-
-            Log.d("Geocode", "Doctor location: ${doctorLocation?.latitude}, ${doctorLocation?.longitude}")
-        } else {
-            Log.e("Geocode", "No coordinates found for address: $address")
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val geocoder = Geocoder(this@PatientMainActivity, Locale.getDefault())
+                val addresses = geocoder.getFromLocationName(address, 1)
+                if (addresses != null && addresses.isNotEmpty()) {
+                    doctorLocation = LatLng(addresses[0].latitude, addresses[0].longitude)
+                    withContext(Dispatchers.Main) {
+                        Log.d("Geocode", "Doctor location: ${doctorLocation?.latitude}, ${doctorLocation?.longitude}")
+                    }
+                } else {
+                    Log.e("Geocode", "No coordinates found for address: $address")
+                }
+            } catch (e: Exception) {
+                Log.e("Geocode", "Error geocoding address: $address", e)
+            }
         }
     }
 
     private fun geocodeAddressAndCalculateRoute(address: String) {
-        val geocoder = Geocoder(this, Locale.getDefault())
-        val addresses = geocoder.getFromLocationName(address, 1)
-        if (addresses != null && addresses.isNotEmpty()) {
-            val location = addresses[0]
-            val patientLatLng = LatLng(location.latitude, location.longitude)
-            calculateRouteToDoctor(patientLatLng)
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val geocoder = Geocoder(this@PatientMainActivity, Locale.getDefault())
+                val addresses = geocoder.getFromLocationName(address, 1)
+                if (addresses != null && addresses.isNotEmpty()) {
+                    val location = addresses[0]
+                    val patientLatLng = LatLng(location.latitude, location.longitude)
+                    withContext(Dispatchers.Main) {
+                        calculateRouteToDoctor(patientLatLng)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("Geocode", "Error geocoding address: $address", e)
+            }
         }
     }
 
+    //TODO ZMIEN TO TUTAJ
     private fun calculateRouteToDoctor(currentLatLng: LatLng) {
+        Log.e("LOKALIZACJA LEKARZA", "LOKALIZACJA LEKARZA: $doctorLocation")
         if (doctorLocation != null) {
             val uri = Uri.parse("https://www.google.com/maps/dir/?api=1&origin=${currentLatLng.latitude},${currentLatLng.longitude}&destination=${doctorLocation?.latitude},${doctorLocation?.longitude}&travelmode=driving")
             val intent = Intent(Intent.ACTION_VIEW, uri)
