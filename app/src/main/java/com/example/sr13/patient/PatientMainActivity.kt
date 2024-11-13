@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.os.Looper
 import android.util.Log
 import android.widget.Button
+import android.widget.SeekBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.utils.widget.ImageFilterView
@@ -49,6 +50,8 @@ class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
     private var doctorLocation: LatLng? = null
     private var patientAddress: String? = null
     private var useDatabaseAddress = false
+    private lateinit var rangeSeekBar: SeekBar
+    private lateinit var seekBarValue: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,6 +65,8 @@ class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
         patientProfilePicMain = findViewById(R.id.patientProfilePicMain)
         patientSubmitReportBtn = findViewById(R.id.addReportBtn)
         logoutBtn = findViewById(R.id.logoutBtn)
+        rangeSeekBar = findViewById(R.id.rangeSeekBar)
+        seekBarValue = findViewById(R.id.seekBarValue)
 
         getPatientData()
 
@@ -87,6 +92,20 @@ class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
                 geocodeAddressAndCalculateRoute(patientAddress!!)
             }
         }
+        rangeSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                val roundedValue = (progress / 5) * 5
+
+                // Ustawiamy wartość w TextView
+                seekBarValue.text = roundedValue.toString()
+
+                // Opcjonalnie, możemy ustawić suwak, aby przeskakiwał do najbliższej wartości
+                rangeSeekBar.progress = roundedValue
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
 
         requestLocationUpdates()
     }
@@ -226,7 +245,8 @@ class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    //TODO ZMIEN TO TUTAJ
+    //TODO DODAJ ZNALEZIENIE W ZASIEGU USTAWIONEGO SUWAKIEM NAJBLIZSZE APTEKI
+    //TODO SZPITALE I PRZYCHODNIE ORAZ DODAJ FRAZE DO WYSZUKIWANIA
     private fun calculateRouteToDoctor(currentLatLng: LatLng) {
         Log.e("LOKALIZACJA LEKARZA", "LOKALIZACJA LEKARZA: $doctorLocation")
         if (doctorLocation != null) {
