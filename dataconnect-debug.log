@@ -1,0 +1,11 @@
+I1009 09:03:59.076002   51631 load.go:37] Reloading schema and connectors...
+I1009 09:03:59.109302   51631 control.go:45] [engine.Service /emulator/ZPO-project 5b62] UpdateSchema(): done sources: schema/schema.gql [1384B] 
+I1009 09:03:59.123269   51631 control.go:73] [engine.Service /emulator/ZPO-project 5b62] UpdateConnector(default): done sources: connector/mutations.gql [1163B] connector/queries.gql [1855B] 
+I1009 09:03:59.151484   51631 codegen.go:82] [connector "default" kotlinSdk] Generating sources into "/Users/jk620/Documents/GitHub/ZPO-project/app/src/main/java/connectors/default"
+I1009 09:03:59.160672   51631 collector.go:107] schema extensions wrote into "/Users/jk620/Documents/GitHub/ZPO-project/dataconnect/.dataconnect/schema"
+Generated sources: prelude.gql [60423B] 
+I1009 09:03:59.161803   51631 collector.go:107] connector "default" kotlinSdk wrote into "/Users/jk620/Documents/GitHub/ZPO-project/app/src/main/java/connectors/default"
+Generated sources: DefaultConnector.kt [2659B] DefaultConnectorKeys.kt [1177B] DefaultConnectorEnums.kt [790B] 
+I1009 09:03:59.162023   51631 load.go:105] Finished reloading
+I1009 09:03:59.167573   51631 dev.go:95] Listening on address (HTTP + gRPC): 127.0.0.1:9399
+I1009 09:03:59.169396   51631 dev.go:95] Listening on address (HTTP + gRPC): [::1]:9399

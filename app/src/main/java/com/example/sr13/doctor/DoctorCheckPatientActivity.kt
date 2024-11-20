@@ -16,6 +16,7 @@ import com.example.sr13.firestore.Doctor
 import com.example.sr13.firestore.Patient
 import com.example.sr13.firestore.Report
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 
 class DoctorCheckPatientActivity : AppCompatActivity() {
@@ -26,6 +27,7 @@ class DoctorCheckPatientActivity : AppCompatActivity() {
     private lateinit var patientProfilePic: ImageView
     private lateinit var recyclerView: RecyclerView
     private lateinit var reportsAdapter: SubmittedReportsAdapter
+    private lateinit var goToChatBtn: Button
     private val reportsList = mutableListOf<SubmittedReportsViewModel>()
 
     private var patientId: String? = null
@@ -38,6 +40,8 @@ class DoctorCheckPatientActivity : AppCompatActivity() {
         patientNameMain = findViewById(R.id.patientNameMain)
         patientProfilePic = findViewById(R.id.patientProfilePicMain)
         removePatientBtn = findViewById(R.id.removePatientBtn)
+        goToChatBtn = findViewById(R.id.patientChatBtn)
+
         recyclerView = findViewById(R.id.patientSubmittedReportsRecyclerView)
         firestore = FirebaseFirestore.getInstance()
 
@@ -63,6 +67,94 @@ class DoctorCheckPatientActivity : AppCompatActivity() {
                 removePatientFromDatabase(id)
             }
         }
+
+        goToChatBtn.setOnClickListener {
+            checkIfChatRoomExists()
+        }
+    }
+
+    private fun checkIfChatRoomExists() {
+        val chatsRef = FirebaseFirestore.getInstance().collection("chats")
+        doctorId?.let { docId ->
+            chatsRef.whereArrayContains("participants", docId)
+                .get()
+                .addOnSuccessListener { documents ->
+                    var chatRoomExists = false
+                    for (document in documents) {
+                        val participants = document.get("participants") as List<*>
+                        if (participants.contains(patientId)) {
+                            // Chat room already exists, open this conversation
+                            chatRoomExists = true
+                            val chatRoomId = document.id
+                            // Load participant's name before opening the chat
+                            loadPatientNameAndOpenChat(chatRoomId)
+                            break
+                        }
+                    }
+                    if (!chatRoomExists) {
+                        // No existing chat room, create a new one
+                        patientId?.let { id ->
+                            loadPatientNameAndCreateChatRoom(id)
+                        }
+                    }
+                }
+        }
+    }
+
+    private fun loadPatientNameAndCreateChatRoom(patientId: String) {
+        firestore.collection("patient")
+            .document(patientId)
+            .get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val patient = document.toObject(Patient::class.java)
+                    val fullName = "${patient?.firstName} ${patient?.lastName}"
+                    createChatRoom(doctorId!!, patientId, fullName) // Pass the participant's name
+                }
+            }
+            .addOnFailureListener { e ->
+                // Handle any errors while fetching patient details
+            }
+    }
+
+    private fun loadPatientNameAndOpenChat(chatRoomId: String) {
+        patientId?.let { id ->
+            firestore.collection("patient")
+                .document(id)
+                .get()
+                .addOnSuccessListener { document ->
+                    if (document.exists()) {
+                        val patient = document.toObject(Patient::class.java)
+                        val participantName = "${patient?.firstName} ${patient?.lastName}"
+                        openChat(chatRoomId, participantName) // Now calling openChat with participant's name
+                    }
+                }
+                .addOnFailureListener { e ->
+                    // Handle any errors while fetching patient details
+                }
+        }
+    }
+
+    private fun createChatRoom(doctorId: String, patientId: String, participantName: String) {
+        val chatRoomData = hashMapOf(
+            "participants" to listOf(doctorId, patientId),
+            "lastMessage" to "",
+            "lastUpdated" to FieldValue.serverTimestamp()
+        )
+
+        val chatsRef = FirebaseFirestore.getInstance().collection("chats")
+        chatsRef.add(chatRoomData).addOnSuccessListener { documentReference ->
+            val chatRoomId = documentReference.id
+            // Navigate to the chat screen with chatRoomId and participant's name
+            openChat(chatRoomId, participantName)
+        }
+    }
+
+    private fun openChat(chatRoomId: String, participantName: String) {
+        val intent = Intent(this, ChatActivity::class.java)
+        intent.putExtra("CHAT_ROOM_ID", chatRoomId) // Pass the chatRoomId to the ChatActivity
+        intent.putExtra("PARTICIPANT_NAME", participantName) // Pass the participant's name here
+        startActivity(intent)
     }
 
     private fun loadPatientData(patientId: String) {
@@ -136,6 +228,7 @@ class DoctorCheckPatientActivity : AppCompatActivity() {
             .whereEqualTo("userId", patientId)
             .get()
             .addOnSuccessListener { documents ->
+                reportsList.clear() // Clear the list before adding new data
                 for (document in documents) {
                     val report = document.toObject(Report::class.java)
                     // Fetch patient details
@@ -153,7 +246,12 @@ class DoctorCheckPatientActivity : AppCompatActivity() {
                                     report.reportId
                                 )
                                 reportsList.add(reportModel)
-                                reportsAdapter.notifyDataSetChanged()
+
+                                // Sort the list by date before updating the adapter
+                                val sortedReportsList = reportsList.sortedByDescending { it.getFormattedDate() }
+
+                                // Update the adapter with the sorted list
+                                reportsAdapter.updateList(sortedReportsList)
                             }
                         }
                         .addOnFailureListener { e ->

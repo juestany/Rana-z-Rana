@@ -9,9 +9,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.sr13.R
 
 class SubmittedReportsAdapter (
-    private val mList: List<SubmittedReportsViewModel>,
+    private var mList: List<SubmittedReportsViewModel>,
     private val onItemClick: (String) -> Unit
-) : RecyclerView.Adapter<SubmittedReportsAdapter.ViewHolder>()  {
+) : RecyclerView.Adapter<SubmittedReportsAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -20,19 +20,25 @@ class SubmittedReportsAdapter (
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val SubmittedReportsViewModel = mList[position]
-        holder.imageView.setImageResource(SubmittedReportsViewModel.image)
-        holder.patientFullName.text = SubmittedReportsViewModel.patientId
-        holder.reportDate.text = SubmittedReportsViewModel.reportDate
+        val submittedReport = mList[position]
+        holder.imageView.setImageResource(submittedReport.image)
+        holder.patientFullName.text = submittedReport.patientId
+        holder.reportDate.text = submittedReport.reportDate
 
         // Set the click listener for the item
         holder.itemView.setOnClickListener {
-            onItemClick(SubmittedReportsViewModel.reportId)
+            onItemClick(submittedReport.reportId)
         }
     }
 
     override fun getItemCount(): Int {
         return mList.size
+    }
+
+    // Method to update the list when new data comes in
+    fun updateList(newList: List<SubmittedReportsViewModel>) {
+        mList = newList
+        notifyDataSetChanged()  // Notify the adapter to refresh the view
     }
 
     class ViewHolder(ItemView: View) : RecyclerView.ViewHolder(ItemView) {

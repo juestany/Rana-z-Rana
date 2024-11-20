@@ -33,6 +33,7 @@ class PatientAddReportActivity : AppCompatActivity() {
     private lateinit var firestore: FirebaseFirestore
     private lateinit var storage: FirebaseStorage
     private lateinit var currentUserId: String // To store current user's ID
+    private lateinit var todayDate: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,6 +45,10 @@ class PatientAddReportActivity : AppCompatActivity() {
 
         previewImage = findViewById(R.id.previewImage)
         patientComment = findViewById(R.id.patientComment)
+        todayDate = findViewById(R.id.patientReportDate)
+
+        // Set today's date in the correct format
+        todayDate.text = getCurrentDate()
 
         findViewById<Button>(R.id.uploadImageBtn).setOnClickListener {
             startImagePicker()
