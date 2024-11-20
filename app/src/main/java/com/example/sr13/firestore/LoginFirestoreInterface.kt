@@ -38,4 +38,5 @@ interface LoginFirestoreInterface {
      * @param email Adres email użytkownika, którego dane logowania mają zostać usunięte.
      */
     suspend fun deleteLogin(email: String)
+    fun hideProgressDialog()
 }

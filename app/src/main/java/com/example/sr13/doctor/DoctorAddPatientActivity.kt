@@ -1,5 +1,6 @@
 package com.example.sr13.doctor
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
@@ -14,9 +15,14 @@ import com.example.sr13.R
 import com.example.sr13.firestore.Doctor
 import com.example.sr13.firestore.Login
 import com.example.sr13.firestore.Patient
+import com.google.android.gms.common.api.Status
+import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.widget.Autocomplete
+import com.google.android.libraries.places.widget.AutocompleteActivity
+import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import java.text.SimpleDateFormat
@@ -24,6 +30,8 @@ import java.util.*
 
 class DoctorAddPatientActivity : AppCompatActivity() {
 
+    private val PLACE_PICKER_REQUEST = 1
+    private lateinit var openMapButton: Button
     private lateinit var addPatientName: EditText
     private lateinit var addPatientLastName: EditText
     private lateinit var addPatientPESEL: EditText
@@ -39,9 +47,15 @@ class DoctorAddPatientActivity : AppCompatActivity() {
     private lateinit var currentDoctorId: String
     private var imageUri: Uri? = null
 
+    @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.doctor_add_patient)
+
+        // Initialize Places API
+        if (!Places.isInitialized()) {
+            Places.initialize(applicationContext, getString(R.string.google_maps_key))
+        }
 
         auth = FirebaseAuth.getInstance()
         firestore = FirebaseFirestore.getInstance()
@@ -49,6 +63,7 @@ class DoctorAddPatientActivity : AppCompatActivity() {
         currentDoctorId = auth.currentUser?.uid ?: ""
 
         addPatientName = findViewById(R.id.addPatientName)
+        openMapButton = findViewById(R.id.openMapButtonPatient)
         addPatientLastName = findViewById(R.id.addPatientLastName)
         addPatientPESEL = findViewById(R.id.addPatientPESEL)
         addPatientNumber = findViewById(R.id.addPatientNumber)
@@ -57,11 +72,21 @@ class DoctorAddPatientActivity : AppCompatActivity() {
         addPatientOperation = findViewById(R.id.addPatientOperation)
         previewImage = findViewById(R.id.previewImage)
 
+        openMapButton.setOnClickListener {
+            openPlacePicker()
+        }
+
         val uploadImageBtn = findViewById<Button>(R.id.uploadImageBtn)
         uploadImageBtn.setOnClickListener { openImageChooser() }
 
         val addPatientBtn = findViewById<Button>(R.id.addPatientBtn)
         addPatientBtn.setOnClickListener { savePatient() }
+    }
+
+    private fun openPlacePicker() {
+        val fields = listOf(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG, Place.Field.ADDRESS)
+        val intent = Autocomplete.IntentBuilder(AutocompleteActivityMode.OVERLAY, fields).build(this)
+        startActivityForResult(intent, PLACE_PICKER_REQUEST)
     }
 
     private fun openImageChooser() {
@@ -76,6 +101,18 @@ class DoctorAddPatientActivity : AppCompatActivity() {
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK && data != null && data.data != null) {
             imageUri = data.data
             previewImage.setImageURI(imageUri)
+        }
+        if (requestCode == PLACE_PICKER_REQUEST) {
+            when (resultCode) {
+                Activity.RESULT_OK -> {
+                    val place = Autocomplete.getPlaceFromIntent(data!!)
+                    addPatientAddress.setText(place.address)
+                }
+                AutocompleteActivity.RESULT_ERROR -> {
+                    val status: Status = Autocomplete.getStatusFromIntent(data!!)
+                    Toast.makeText(this, "Error: ${status.statusMessage}", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
 
@@ -194,55 +231,46 @@ class DoctorAddPatientActivity : AppCompatActivity() {
                     firestore.collection("doctor")
                         .document(currentDoctorId)
                         .update("patientIds", updatedPatientIds)
-                        .addOnSuccessListener {
-                            Log.d(TAG, "Doctor patient list updated successfully")
-                        }
-                        .addOnFailureListener { e ->
-                            Log.e(TAG, "Error updating doctor patient list", e)
-                        }
                 }
             }
             .addOnFailureListener { e ->
-                Log.e(TAG, "Error getting doctor document", e)
-            }
-    }
-
-    private fun savePatientLogin(email: String, password: String, role: String) {
-        val login = Login(email = email, password = password, role = role)
-        firestore.collection("login")
-            .document(auth.currentUser?.uid ?: "")
-            .set(login)
-            .addOnSuccessListener {
-                Log.d(TAG, "Patient login saved successfully")
-            }
-            .addOnFailureListener { e ->
-                Log.e(TAG, "Error saving patient login", e)
+                Log.e(TAG, "Failed to update doctor's patient list", e)
             }
     }
 
     private fun generatePatientEmail(firstName: String, lastName: String): String {
-        val firstThreeLettersFirstName = if (firstName.length >= 3) firstName.substring(0, 3).lowercase(Locale.getDefault()) else firstName.lowercase(Locale.getDefault())
-        val firstThreeLettersLastName = if (lastName.length >= 3) lastName.substring(0, 3).lowercase(Locale.getDefault()) else lastName.lowercase(Locale.getDefault())
-        return "$firstThreeLettersFirstName$firstThreeLettersLastName@gmail.com"
+        val uuid = UUID.randomUUID().toString().substring(0, 8)
+        return "${firstName.lowercase(Locale.getDefault())}.${lastName.lowercase(Locale.getDefault())}.$uuid@patientapp.com"
     }
 
     private fun generateRandomPassword(): String {
-        val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
-        return (1..8)
-            .map { allowedChars.random() }
-            .joinToString("")
+        return UUID.randomUUID().toString().substring(0, 8)
+    }
+
+    private fun savePatientLogin(email: String, password: String, role: String) {
+        val login = Login(email, password, role)
+        firestore.collection("login")
+            .document(email)
+            .set(login)
+            .addOnSuccessListener {
+                Log.d(TAG, "Patient login data saved to Firestore")
+            }
+            .addOnFailureListener { e ->
+                Log.e(TAG, "Failed to save login data", e)
+            }
     }
 
     private fun navigateToSuccessScreen(email: String, password: String) {
         val intent = Intent(this, DoctorAddPatientSuccessActivity::class.java)
-        intent.putExtra("patientLogin", email)
-        intent.putExtra("patientPassword", password)
+        intent.putExtra("email", email)
+        intent.putExtra("password", password)
         startActivity(intent)
         finish()
     }
 
+
     companion object {
         private const val TAG = "DoctorAddPatientActivity"
-        private const val PICK_IMAGE_REQUEST = 1
+        private const val PICK_IMAGE_REQUEST = 71
     }
 }
