@@ -1,10 +1,12 @@
 package com.example.sr13.patient
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.location.Location
+import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.Looper
@@ -27,11 +29,14 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.android.libraries.places.api.Places
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.json.JSONObject
+import java.net.HttpURLConnection
+import java.net.URL
 import java.util.*
 
 class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -68,6 +73,8 @@ class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
         rangeSeekBar = findViewById(R.id.rangeSeekBar)
         seekBarValue = findViewById(R.id.seekBarValue)
 
+        Places.initialize(applicationContext, "AIzaSyCcRzRGfnozt57TuI03DIe_PyfqSfwjwrg")
+
         getPatientData()
 
         patientSubmitReportBtn.setOnClickListener {
@@ -92,14 +99,29 @@ class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
                 geocodeAddressAndCalculateRoute(patientAddress!!)
             }
         }
+
+        findViewById<Button>(R.id.znajdzApteke).setOnClickListener {
+            val radius = rangeSeekBar.progress * 1000 // km to meters
+            if (!isInternetAvailable()) {
+                Log.e("NetworkError", "No internet connection")
+                return@setOnClickListener
+            }
+            else{
+                findNearbyPlaces("pharmacy", radius)
+            }
+
+
+        }
+
+        findViewById<Button>(R.id.znajdzSzpital).setOnClickListener {
+            val radius = rangeSeekBar.progress * 1000 // km to meters
+            findNearbyPlaces("hospital", radius)
+        }
+
         rangeSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 val roundedValue = (progress / 5) * 5
-
-                // Ustawiamy wartość w TextView
                 seekBarValue.text = roundedValue.toString()
-
-                // Opcjonalnie, możemy ustawić suwak, aby przeskakiwał do najbliższej wartości
                 rangeSeekBar.progress = roundedValue
             }
 
@@ -113,7 +135,7 @@ class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
     private fun requestLocationUpdates() {
         val locationRequest = LocationRequest.create().apply {
             interval = 10000
-            fastestInterval = 5000000
+            fastestInterval = 5000
             priority = LocationRequest.PRIORITY_HIGH_ACCURACY
         }
 
@@ -130,17 +152,59 @@ class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            getPatientAddressFromDatabase()
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 1)
             return
         }
         fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
     }
 
+    private fun findNearbyPlaces(placeType: String, radius: Int) {
+        currentLocation?.let { location ->
+            val currentLatLng = LatLng(location.latitude, location.longitude)
+            val placesUrl = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?" +
+                    "location=${currentLatLng.latitude},${currentLatLng.longitude}&radius=$radius&type=$placeType&key=AIzaSyCcRzRGfnozt57TuI03DIe_PyfqSfwjwrg"
+
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    val connection = URL(placesUrl).openConnection() as HttpURLConnection
+                    connection.requestMethod = "GET"
+                    connection.connect()
+
+                    val responseCode = connection.responseCode
+                    Log.d("PlacesAPI_ResponseCode", "Response code: $responseCode") // Logowanie kodu odpowiedzi HTTP
+
+                    if (responseCode == HttpURLConnection.HTTP_OK) {
+                        val response = connection.inputStream.bufferedReader().use { it.readText() }
+                        Log.d("PlacesAPI_Response", response) // Logowanie treści odpowiedzi
+                        val jsonResponse = JSONObject(response)
+                        val results = jsonResponse.getJSONArray("results")
+
+                        withContext(Dispatchers.Main) {
+                            mMap.clear()
+                            for (i in 0 until results.length()) {
+                                val place = results.getJSONObject(i)
+                                val lat = place.getJSONObject("geometry").getJSONObject("location").getDouble("lat")
+                                val lng = place.getJSONObject("geometry").getJSONObject("location").getDouble("lng")
+                                val name = place.getString("name")
+                                mMap.addMarker(MarkerOptions().position(LatLng(lat, lng)).title(name))
+                            }
+                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 12f))
+                        }
+                    } else {
+                        val errorResponse = connection.errorStream?.bufferedReader()?.use { it.readText() }
+                        Log.e("PlacesAPI_Error", "Error response: $errorResponse")
+                    }
+                } catch (e: Exception) {
+                    Log.e("PlacesAPI_Exception", "Exception: ${e.message}", e)
+                }
+            }
+        }
+    }
+
+
+
     private fun getPatientData() {
         val userId = auth.currentUser?.uid
-        Log.e("SPRAWDZENIE", "ID UZYTKOWNIKA: ${userId}")
-
         userId?.let { uid ->
             firestore.collection("patient")
                 .document(uid)
@@ -152,7 +216,6 @@ class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
                         val imageUrl = document.getString("imageId")
                         patientAddress = document.getString("adress")
                         val doctorId = document.getString("doctorId")
-                        Log.e("SPRAWDZENIE 2", "ADRES UYZTKOWNIKA: ${patientAddress}")
 
                         patientNameMain.text = "$firstName $lastName"
                         patientRoleMain.text = "Pacjent"
@@ -164,8 +227,6 @@ class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
                         doctorId?.let {
                             getDoctorLocation(it)
                         }
-                    } else {
-                        Log.e("PatientData", "Document does not exist")
                     }
                 }
                 .addOnFailureListener { exception ->
@@ -174,11 +235,10 @@ class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    private fun getPatientAddressFromDatabase() {
-        useDatabaseAddress = true
-        patientAddress?.let {
-            Log.d("PatientAddress", "Using patient address from database: $it")
-        }
+    private fun isInternetAvailable(): Boolean {
+        val connectivityManager = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
+        val networkInfo = connectivityManager.activeNetworkInfo
+        return networkInfo != null && networkInfo.isConnected
     }
 
     private fun fetchImageFromFirebaseStorage(imageUrl: String) {
@@ -192,7 +252,6 @@ class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
             .addOnSuccessListener { document ->
                 if (document != null) {
                     val doctorAddress = document.getString("adress")
-                    Log.e("SPRAWDZENIE LEKARZA", "SPRAWDZENIE LOKALIZACJI 1: $doctorAddress")
                     if (doctorAddress != null) {
                         geocodeDoctorAddress(doctorAddress)
                     }
@@ -203,29 +262,33 @@ class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
             }
     }
 
-    private fun geocodeDoctorAddress(address: String, retryCount: Int = 10) {
+    private fun geocodeDoctorAddress(address: String) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val geocoder = Geocoder(this@PatientMainActivity, Locale.getDefault())
                 val addresses = geocoder.getFromLocationName(address, 1)
                 if (addresses != null && addresses.isNotEmpty()) {
                     doctorLocation = LatLng(addresses[0].latitude, addresses[0].longitude)
-                    withContext(Dispatchers.Main) {
-                        Log.d("Geocode", "Doctor location: ${doctorLocation?.latitude}, ${doctorLocation?.longitude}")
-                    }
-                } else {
-                    Log.e("Geocode", "No coordinates found for address: $address")
                 }
             } catch (e: Exception) {
-                Log.e("Geocode", "Error geocoding address: $address", e)
-                if (retryCount > 0) {
-                    delay(9000)
-                    geocodeDoctorAddress(address, retryCount - 1)
-                }
+                Log.e("Geocode", "Error geocoding address", e)
             }
         }
     }
 
+    private fun calculateRouteToDoctor(currentLatLng: LatLng) {
+        if (doctorLocation != null) {
+            val uri = Uri.parse(
+                "https://www.google.com/maps/dir/?api=1&origin=${currentLatLng.latitude},${currentLatLng.longitude}" +
+                        "&destination=${doctorLocation?.latitude},${doctorLocation?.longitude}&travelmode=driving"
+            )
+            val intent = Intent(Intent.ACTION_VIEW, uri)
+            intent.setPackage("com.google.android.apps.maps")
+            startActivity(intent)
+        } else {
+            Log.e("RouteError", "Doctor location is not available for routing")
+        }
+    }
     private fun geocodeAddressAndCalculateRoute(address: String) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
@@ -241,21 +304,8 @@ class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
                 }
             } catch (e: Exception) {
                 Log.e("Geocode", "Error geocoding address: $address", e)
+                Log.e("Geocode", "Error geocoding address", e)
             }
-        }
-    }
-
-    //TODO DODAJ ZNALEZIENIE W ZASIEGU USTAWIONEGO SUWAKIEM NAJBLIZSZE APTEKI
-    //TODO SZPITALE I PRZYCHODNIE ORAZ DODAJ FRAZE DO WYSZUKIWANIA
-    private fun calculateRouteToDoctor(currentLatLng: LatLng) {
-        Log.e("LOKALIZACJA LEKARZA", "LOKALIZACJA LEKARZA: $doctorLocation")
-        if (doctorLocation != null) {
-            val uri = Uri.parse("https://www.google.com/maps/dir/?api=1&origin=${currentLatLng.latitude},${currentLatLng.longitude}&destination=${doctorLocation?.latitude},${doctorLocation?.longitude}&travelmode=driving")
-            val intent = Intent(Intent.ACTION_VIEW, uri)
-            intent.setPackage("com.google.android.apps.maps")
-            startActivity(intent)
-        } else {
-            Log.e("RouteError", "Doctor location is not available for routing")
         }
     }
 

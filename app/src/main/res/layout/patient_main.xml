@@ -30,14 +30,16 @@
             app:layout_constraintStart_toEndOf="@+id/patientProfilePicMain"
             app:layout_constraintTop_toBottomOf="@+id/patientNameMain"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="@+id/patientProfilePicMain" />
+            app:layout_constraintBottom_toBottomOf="@+id/patientProfilePicMain"
+            app:layout_constraintHorizontal_bias="0.075"
+            app:layout_constraintVertical_bias="0.333" />
 
     <androidx.constraintlayout.utils.widget.ImageFilterView
             android:id="@+id/patientProfilePicMain"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
+            android:layout_width="84dp"
+            android:layout_height="70dp"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="16dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:src="@tools:sample/avatars" />
@@ -133,12 +135,22 @@
             app:layout_constraintHorizontal_bias="0.0" />
 
     <Button
+            android:id="@+id/znajdzFraze"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="0dp"
+            android:text="Znajdź fraze"
+            app:layout_constraintTop_toBottomOf="@+id/searchQueryField"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    <Button
             android:id="@+id/logoutBtn"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:text="Wyloguj się"
-            app:layout_constraintTop_toBottomOf="@+id/searchQueryField"
+            app:layout_constraintTop_toBottomOf="@+id/znajdzFraze"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
