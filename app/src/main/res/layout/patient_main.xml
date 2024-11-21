@@ -163,13 +163,12 @@
             android:layout_width="0dp"
             android:layout_height="57dp"
             android:id="@+id/button2"
-            android:layout_marginTop="21dp"
-            app:layout_constraintTop_toBottomOf="@+id/addReportBtn"
-            app:layout_constraintBottom_toTopOf="@+id/logoutBtn"
-            app:layout_constraintVertical_bias="0.0"
+            app:layout_constraintBottom_toTopOf="@+id/addReportBtn"
             app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginStart="34dp"
+            android:layout_marginStart="226dp"
             android:layout_marginEnd="34dp"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            android:layout_marginBottom="8dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
