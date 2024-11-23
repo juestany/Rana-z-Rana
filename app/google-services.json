@@ -1,13 +1,14 @@
 {
   "project_info": {
     "project_number": "30009473935",
+    "firebase_url": "https://fir-zpo-default-rtdb.europe-west1.firebasedatabase.app",
     "project_id": "fir-zpo",
     "storage_bucket": "fir-zpo.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:30009473935:android:122bb121e588cdf163e9fa",
+        "mobilesdk_app_id": "1:30009473935:android:af18681be72a950163e9fa",
         "android_client_info": {
           "package_name": "com.example.sr13"
         }

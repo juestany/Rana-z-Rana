@@ -1,60 +1,64 @@
 package com.example.sr13
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.content.Context
-import android.os.Build
+import android.Manifest
+import android.app.PendingIntent
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.util.Log
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import com.example.sr13.patient.PatientMainActivity
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 
 class MyFirebaseMessagingService : FirebaseMessagingService() {
 
-    override fun onNewToken(token: String) {
-        super.onNewToken(token)
-        Log.d(TAG, "Refreshed token: $token")
-        //sendRegistrationToServer(token)
-        // Tutaj możesz wykonać dodatkowe operacje związane z nowym tokenem, na przykład przesyłać go do serwera backendowego
-    }
-
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
-        Log.d(TAG, "Received message: $remoteMessage")
 
-        // Obsługa otrzymanych powiadomień
-        remoteMessage.notification?.let {
-            sendNotification(it.title, it.body)
-        }
+        Log.d("FCM", "Otrzymano wiadomość: ${remoteMessage.data}")
+
+        val senderName = remoteMessage.data["senderName"] ?: "Nieznany użytkownik"
+        val message = remoteMessage.data["message"] ?: "Nowa wiadomość"
+
+        Log.d("FCM", "Nadawca: $senderName, Wiadomość: $message")
+
+        showNotification(senderName, "$senderName wysłał(a) ci wiadomość")
     }
 
-    private fun sendNotification(title: String?, body: String?) {
-        val notificationManager =
-            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        val channelId = "default_channel_id"
 
-        // Tworzenie kanału powiadomień dla Androida w wersji Oreo i nowszych
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                channelId,
-                "Default Channel",
-                NotificationManager.IMPORTANCE_DEFAULT
-            )
-            notificationManager.createNotificationChannel(channel)
+    private fun showNotification(title: String, body: String) {
+        Log.d("FCM", "Wyświetlanie powiadomienia: Tytuł=$title, Treść=$body")
+        val notificationId = System.currentTimeMillis().toInt()
+        val channelId = "messages_channel"
+
+        val intent = Intent(this, PatientMainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
+        val pendingIntent = PendingIntent.getActivity(
+            this, 0, intent, PendingIntent.FLAG_IMMUTABLE
+        )
 
-        // Budowanie powiadomienia
         val notificationBuilder = NotificationCompat.Builder(this, channelId)
+            .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(title)
             .setContentText(body)
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setContentIntent(pendingIntent)
             .setAutoCancel(true)
 
-        // Wyświetlenie powiadomienia
-        notificationManager.notify(System.currentTimeMillis().toInt(), notificationBuilder.build())
-    }
 
-    companion object {
-        private const val TAG = "MyFirebaseMsgService"
+        val notificationManager = NotificationManagerCompat.from(this)
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            notificationManager.notify(notificationId, notificationBuilder.build())
+            Log.d("FCM", "Powiadomienie wysłane")
+        } else {
+            Log.e("FCM", "Brak uprawnień do wyświetlenia powiadomienia")
+        }
     }
 }

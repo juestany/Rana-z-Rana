@@ -9,15 +9,11 @@ import android.widget.Button
 import android.widget.EditText
 import com.example.sr13.doctor.DoctorMainActivity
 import com.example.sr13.patient.PatientMainActivity
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.database
 import com.google.firebase.firestore.BuildConfig
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.storage
 
 class LoginActivity : BaseActivity(), View.OnClickListener {
     private var inputEmail: EditText? = null

@@ -1,12 +1,14 @@
 package com.example.sr13.patient
 
 import android.Manifest
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.location.Location
-import android.net.ConnectivityManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
@@ -20,25 +22,29 @@ import com.bumptech.glide.Glide
 import com.example.sr13.LoginActivity
 import com.example.sr13.R
 import com.example.sr13.doctor.ChatActivity
-import com.google.android.gms.location.*
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.libraries.places.api.Places
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.android.libraries.places.api.Places
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
-import java.net.HttpURLConnection
 import java.net.URL
-import java.util.*
+import java.util.Locale
 
 class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -84,7 +90,7 @@ class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
         seekBarValue = findViewById(R.id.seekBarValue)
 
         // Initialize Places API
-        Places.initialize(applicationContext, "YOUR_API_KEY")
+        Places.initialize(applicationContext, "AIzaSyCcRzRGfnozt57TuI03DIe_PyfqSfwjwrg")
 
         // Load patient data and set up listeners
         getPatientData()
@@ -95,7 +101,31 @@ class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
         mapFragment.getMapAsync(this)
 
         requestLocationUpdates()
+        registerDeviceToken()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val name = "Messages"
+            val descriptionText = "Notifications for new messages"
+            val importance = NotificationManager.IMPORTANCE_HIGH
+            val channel = NotificationChannel("messages_channel", name, importance).apply {
+                description = descriptionText
+            }
+            val notificationManager = getSystemService(NotificationManager::class.java)
+            notificationManager.createNotificationChannel(channel)
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                    1
+                )
+            }
+        }
     }
+
+
 
     private fun setupListeners() {
         patientSubmitReportBtn.setOnClickListener {
@@ -266,7 +296,7 @@ class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun findNearbyPlaces(type: String, radius: Int) {
         currentLocation?.let {
-            val url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${it.latitude},${it.longitude}&radius=$radius&type=$type&key=YOUR_API_KEY"
+            val url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${it.latitude},${it.longitude}&radius=$radius&type=$type&key=AIzaSyCcRzRGfnozt57TuI03DIe_PyfqSfwjwrg"
             CoroutineScope(Dispatchers.IO).launch {
                 val response = URL(url).readText()
                 val json = JSONObject(response)
@@ -315,5 +345,30 @@ class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
             return
         }
         fusedLocationClient.requestLocationUpdates(request, locationCallback, Looper.getMainLooper())
+    }
+
+    private fun registerDeviceToken() {
+        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val token = task.result
+                Log.d("FCM", "Token wygenerowany: $token") // Log wygenerowanego tokena
+                saveTokenToFirestore(token)
+            } else {
+                Log.e("FCM", "Błąd podczas generowania tokena", task.exception)
+            }
+        }
+    }
+
+
+    private fun saveTokenToFirestore(token: String) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        userId?.let {
+            val userDoc = FirebaseFirestore.getInstance().collection("users").document(it)
+            userDoc.update("deviceToken", token).addOnSuccessListener {
+                Log.d("FCM", "Token saved successfully")
+            }.addOnFailureListener { e ->
+                Log.e("FCM", "Failed to save token", e)
+            }
+        }
     }
 }
