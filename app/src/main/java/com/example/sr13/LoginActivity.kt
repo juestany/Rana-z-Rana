@@ -15,6 +15,10 @@ import com.google.firebase.firestore.BuildConfig
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 
+/**
+ * Handles the user login functionality.
+ * Connects to Firebase for user authentication and determines the user's role.
+ */
 class LoginActivity : BaseActivity(), View.OnClickListener {
     private var inputEmail: EditText? = null
     private var inputPassword: EditText? = null
@@ -22,14 +26,15 @@ class LoginActivity : BaseActivity(), View.OnClickListener {
     private lateinit var firestore: FirebaseFirestore
     private lateinit var auth: FirebaseAuth
 
+    /**
+     * Called when the activity is first created.
+     * Initializes Firebase services and UI components.
+     * Sets up the Firebase Emulator Suite when running in debug mode.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.login)
 
-        // When running in debug mode, connect to the Firebase Emulator Suite.
-        // "10.0.2.2" is a special IP address which allows the Android Emulator
-        // to connect to "localhost" on the host computer. The port values (9xxx)
-        // must match the values defined in the firebase.json file.
         if (BuildConfig.DEBUG) {
             FirebaseDatabase.getInstance().useEmulator("10.0.2.2", 9003)
             FirebaseAuth.getInstance().useEmulator("10.0.2.2", 9099)
@@ -46,6 +51,10 @@ class LoginActivity : BaseActivity(), View.OnClickListener {
         }
     }
 
+    /**
+     * Handles button click events.
+     * Navigates to the registration screen when the register text view is clicked.
+     */
     override fun onClick(view: View?) {
         if (view != null) {
             when (view.id) {
@@ -57,6 +66,13 @@ class LoginActivity : BaseActivity(), View.OnClickListener {
         }
     }
 
+    /**
+     * Validates the user's login details.
+     * Checks if the email and password fields are not empty.
+     * Shows a snackbar message if validation fails.
+     *
+     * @return True if both fields are valid; false otherwise.
+     */
     private fun validateLoginDetails(): Boolean {
         return when {
             TextUtils.isEmpty(inputEmail?.text.toString().trim { it <= ' ' }) -> {
@@ -74,6 +90,11 @@ class LoginActivity : BaseActivity(), View.OnClickListener {
         }
     }
 
+    /**
+     * Logs in a registered user using Firebase Authentication.
+     * Validates the user's credentials before attempting login.
+     * On successful login, navigates to the appropriate activity based on the user's role.
+     */
     private fun logInRegisteredUser() {
         if (validateLoginDetails()) {
             val email = inputEmail?.text.toString().trim() { it <= ' ' }
@@ -90,6 +111,11 @@ class LoginActivity : BaseActivity(), View.OnClickListener {
         }
     }
 
+    /**
+     * Determines the user's role (e.g., doctor or patient) and navigates to the appropriate activity.
+     * Fetches the user's role from Firestore based on their ID.
+     * Handles navigation and displays errors if the role is unknown or the data fetch fails.
+     */
     private fun goToNextActivity() {
         val user = FirebaseAuth.getInstance().currentUser
         val uid = user?.email.toString()

@@ -20,18 +20,31 @@ import com.google.firebase.firestore.FirebaseFirestore
 import java.util.Date
 import java.util.Locale
 
+/**
+ * Main activity for doctors, displaying their profile and today's submitted reports.
+ * Provides navigation to the patient list and logout functionality.
+ */
 class DoctorMainActivity : AppCompatActivity() {
 
+    // UI components
     private lateinit var doctorNameMain: TextView
     private lateinit var doctorRoleMain: TextView
     private lateinit var doctorProfilePicMain: ImageFilterView
     private lateinit var doctorSubmittedReportsRecyclerView: RecyclerView
     private lateinit var myPatientsBtn: Button
     private lateinit var logoutBtn: Button
+
+    // Firebase components
     private lateinit var auth: FirebaseAuth
     private lateinit var firestore: FirebaseFirestore
-    private lateinit var patientIds: List<String>
 
+    // Data variables
+    private lateinit var patientIds: List<String> // List of patient IDs associated with the doctor
+
+    /**
+     * Called when the activity is first created.
+     * Initializes Firebase, binds UI components, and sets up listeners.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.doctor_main)
@@ -40,7 +53,7 @@ class DoctorMainActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         firestore = FirebaseFirestore.getInstance()
 
-        // Initialize views
+        // Bind UI components
         doctorNameMain = findViewById(R.id.patientNameMain)
         doctorRoleMain = findViewById(R.id.doctorRoleMain)
         doctorProfilePicMain = findViewById(R.id.patientProfilePicMain)
@@ -48,15 +61,17 @@ class DoctorMainActivity : AppCompatActivity() {
         myPatientsBtn = findViewById(R.id.myPatientsBtn)
         logoutBtn = findViewById(R.id.logoutBtn)
 
-        // Set up initial values or listeners here
+        // Fetch doctor data and setup RecyclerView
         getDoctorData()
         setupRecyclerView()
 
+        // Button to navigate to the "My Patients" screen
         myPatientsBtn.setOnClickListener {
             val intent = Intent(this@DoctorMainActivity, DoctorMyPatientsActivity::class.java)
             startActivity(intent)
         }
 
+        // Logout button functionality
         logoutBtn.setOnClickListener {
             auth.signOut()
             val intent = Intent(this@DoctorMainActivity, LoginActivity::class.java)
@@ -65,6 +80,10 @@ class DoctorMainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Fetches doctor profile data from Firestore and populates the UI.
+     * Also triggers fetching today's submitted reports.
+     */
     private fun getDoctorData() {
         val userId = auth.currentUser?.uid
 
@@ -77,22 +96,19 @@ class DoctorMainActivity : AppCompatActivity() {
                         val firstName = document.getString("firstName")
                         val lastName = document.getString("lastName")
                         val title = document.getString("title")
-                        val address = document.getString("address") // Fixed typo
-                        val phoneNumber = document.getString("phoneNumber")
                         val imageUrl = document.getString("imageId")
                         patientIds = document.get("patientIds") as List<String>? ?: listOf()
 
+                        // Populate UI with doctor information
                         doctorNameMain.text = "$firstName $lastName"
                         doctorRoleMain.text = title
 
-                        Log.d("DoctorData", "Fetched imageUrl: $imageUrl")
-
-                        // Fetch and display the image from Firebase Storage using URL
+                        // Fetch and display doctor's profile picture
                         imageUrl?.let {
                             fetchImageFromFirebaseStorage(it)
                         }
 
-                        // Fetch today's reports after getting patient IDs
+                        // Fetch today's reports after patient IDs are loaded
                         fetchTodayReports()
                     } else {
                         Log.e("DoctorData", "Document does not exist")
@@ -104,17 +120,27 @@ class DoctorMainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Loads the doctor's profile image from Firebase Storage using the URL.
+     *
+     * @param imageUrl The URL of the image to be loaded.
+     */
     private fun fetchImageFromFirebaseStorage(imageUrl: String) {
-        // Load the image into ImageFilterView using Glide
         Glide.with(this)
             .load(imageUrl)
             .into(doctorProfilePicMain)
     }
 
+    /**
+     * Sets up the RecyclerView for displaying today's submitted reports.
+     */
     private fun setupRecyclerView() {
         doctorSubmittedReportsRecyclerView.layoutManager = LinearLayoutManager(this)
     }
 
+    /**
+     * Fetches today's submitted reports for the doctor's patients from Firestore.
+     */
     private fun fetchTodayReports() {
         val today = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
         Log.d("DoctorMainActivity", "Today's date: $today")
@@ -124,12 +150,15 @@ class DoctorMainActivity : AppCompatActivity() {
             .get()
             .addOnSuccessListener { documents ->
                 val reportsList = mutableListOf<SubmittedReportsViewModel>()
+
+                // Iterate through today's reports
                 for (document in documents) {
                     val patientId = document.getString("userId") ?: ""
                     if (patientIds.contains(patientId)) {
                         val reportDate = document.getString("date") ?: ""
                         val reportId = document.id
 
+                        // Fetch patient details to get the full name
                         firestore.collection("patient")
                             .document(patientId)
                             .get()
@@ -139,6 +168,7 @@ class DoctorMainActivity : AppCompatActivity() {
                                     val lastName = patientDocument.getString("lastName") ?: ""
                                     val fullName = "$firstName $lastName"
 
+                                    // Add report details to the list
                                     val reportModel = SubmittedReportsViewModel(
                                         R.drawable.ic_paper_icon,
                                         fullName,
@@ -146,7 +176,13 @@ class DoctorMainActivity : AppCompatActivity() {
                                         reportId
                                     )
                                     reportsList.add(reportModel)
-                                    doctorSubmittedReportsRecyclerView.adapter?.notifyDataSetChanged()
+
+                                    // Update RecyclerView adapter
+                                    doctorSubmittedReportsRecyclerView.adapter = SubmittedReportsAdapter(reportsList) { reportId ->
+                                        val intent = Intent(this@DoctorMainActivity, DoctorCheckPatientReportActivity::class.java)
+                                        intent.putExtra("REPORT_ID", reportId)
+                                        startActivity(intent)
+                                    }
                                 }
                             }
                             .addOnFailureListener { e ->
@@ -154,15 +190,9 @@ class DoctorMainActivity : AppCompatActivity() {
                             }
                     }
                 }
-                doctorSubmittedReportsRecyclerView.adapter = SubmittedReportsAdapter(reportsList) { reportId ->
-                    val intent = Intent(this@DoctorMainActivity, DoctorCheckPatientReportActivity::class.java)
-                    intent.putExtra("REPORT_ID", reportId)
-                    startActivity(intent)
-                }
             }
             .addOnFailureListener { exception ->
                 Log.e("DoctorMainActivity", "Error fetching today's reports", exception)
             }
     }
-
 }

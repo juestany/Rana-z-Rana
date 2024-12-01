@@ -21,6 +21,10 @@ import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.widget.AutocompleteActivity
 
+/**
+ * Handles the user registration functionality for doctors.
+ * Integrates Google Places API for address input and Firebase Authentication for account creation.
+ */
 class RegisterActivity : BaseActivity() {
 
     private val PLACE_PICKER_REQUEST = 1
@@ -35,6 +39,10 @@ class RegisterActivity : BaseActivity() {
     private lateinit var inputPassword: EditText
     private lateinit var inputRepPass: EditText
 
+    /**
+     * Called when the activity is first created.
+     * Initializes UI components, sets up click listeners, and integrates Google Places API.
+     */
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,12 +72,23 @@ class RegisterActivity : BaseActivity() {
         }
     }
 
+    /**
+     * Launches the Google Places picker for selecting an address.
+     */
     private fun openPlacePicker() {
         val fields = listOf(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG, Place.Field.ADDRESS)
         val intent = Autocomplete.IntentBuilder(AutocompleteActivityMode.OVERLAY, fields).build(this)
         startActivityForResult(intent, PLACE_PICKER_REQUEST)
     }
 
+    /**
+     * Handles results from external activities (e.g., Google Places picker).
+     * Sets the selected address in the input field or displays an error if the operation failed.
+     *
+     * @param requestCode The request code identifying the activity result.
+     * @param resultCode The result code from the activity.
+     * @param data The returned data (e.g., selected place).
+     */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -87,6 +106,12 @@ class RegisterActivity : BaseActivity() {
         }
     }
 
+    /**
+     * Validates all the registration input fields.
+     * Ensures that no field is empty and passwords match.
+     *
+     * @return True if all fields are valid; false otherwise.
+     */
     private fun validateRegisterDetails(): Boolean {
         return when {
             TextUtils.isEmpty(inputEmail.text.toString().trim()) -> {
@@ -129,6 +154,10 @@ class RegisterActivity : BaseActivity() {
         }
     }
 
+    /**
+     * Handles the registration process for a doctor.
+     * Validates input fields, creates a Firebase Authentication user, and registers the doctor in Firestore.
+     */
     private fun registerDoctor() {
         if (validateRegisterDetails()) {
             showProgressDialog("Proszę czekać...")
@@ -162,6 +191,11 @@ class RegisterActivity : BaseActivity() {
         }
     }
 
+
+    /**
+     * Callback for successful user registration.
+     * Displays a success message, signs out the user, and finishes the activity.
+     */
     fun userRegistrationSuccess() {
         hideProgressDialog()
         Toast.makeText(this@RegisterActivity, "Rejestracja zakończona sukcesem.", Toast.LENGTH_LONG).show()

@@ -28,9 +28,17 @@ import com.google.firebase.storage.FirebaseStorage
 import java.text.SimpleDateFormat
 import java.util.*
 
+/**
+ * Activity for adding a new patient by a doctor.
+ * Handles user input, image upload, patient creation, and Firestore integration.
+ */
 class DoctorAddPatientActivity : AppCompatActivity() {
 
+    // Constants
     private val PLACE_PICKER_REQUEST = 1
+    private val PICK_IMAGE_REQUEST = 71
+
+    // UI components
     private lateinit var openMapButton: Button
     private lateinit var addPatientName: EditText
     private lateinit var addPatientLastName: EditText
@@ -41,10 +49,15 @@ class DoctorAddPatientActivity : AppCompatActivity() {
     private lateinit var addPatientOperation: EditText
     private lateinit var previewImage: ImageView
 
+    // Firebase components
     private lateinit var auth: FirebaseAuth
     private lateinit var firestore: FirebaseFirestore
     private lateinit var storage: FirebaseStorage
+
+    // Current doctor's ID
     private lateinit var currentDoctorId: String
+
+    // Selected image URI
     private var imageUri: Uri? = null
 
     @SuppressLint("MissingInflatedId")
@@ -52,16 +65,18 @@ class DoctorAddPatientActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.doctor_add_patient)
 
-        // Initialize Places API
+        // Initialize Places API for address selection
         if (!Places.isInitialized()) {
             Places.initialize(applicationContext, getString(R.string.google_maps_key))
         }
 
+        // Initialize Firebase components
         auth = FirebaseAuth.getInstance()
         firestore = FirebaseFirestore.getInstance()
         storage = FirebaseStorage.getInstance()
         currentDoctorId = auth.currentUser?.uid ?: ""
 
+        // Bind UI components
         addPatientName = findViewById(R.id.addPatientName)
         openMapButton = findViewById(R.id.openMapButtonPatient)
         addPatientLastName = findViewById(R.id.addPatientLastName)
@@ -72,23 +87,24 @@ class DoctorAddPatientActivity : AppCompatActivity() {
         addPatientOperation = findViewById(R.id.addPatientOperation)
         previewImage = findViewById(R.id.previewImage)
 
-        openMapButton.setOnClickListener {
-            openPlacePicker()
-        }
-
-        val uploadImageBtn = findViewById<Button>(R.id.uploadImageBtn)
-        uploadImageBtn.setOnClickListener { openImageChooser() }
-
-        val addPatientBtn = findViewById<Button>(R.id.addPatientBtn)
-        addPatientBtn.setOnClickListener { savePatient() }
+        // Set up button listeners
+        openMapButton.setOnClickListener { openPlacePicker() }
+        findViewById<Button>(R.id.uploadImageBtn).setOnClickListener { openImageChooser() }
+        findViewById<Button>(R.id.addPatientBtn).setOnClickListener { savePatient() }
     }
 
+    /**
+     * Opens the Google Places Autocomplete UI to select an address.
+     */
     private fun openPlacePicker() {
         val fields = listOf(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG, Place.Field.ADDRESS)
         val intent = Autocomplete.IntentBuilder(AutocompleteActivityMode.OVERLAY, fields).build(this)
         startActivityForResult(intent, PLACE_PICKER_REQUEST)
     }
 
+    /**
+     * Opens a file chooser to select an image from the device.
+     */
     private fun openImageChooser() {
         val intent = Intent()
         intent.type = "image/*"
@@ -96,6 +112,9 @@ class DoctorAddPatientActivity : AppCompatActivity() {
         startActivityForResult(Intent.createChooser(intent, "Wybierz zdjęcie"), PICK_IMAGE_REQUEST)
     }
 
+    /**
+     * Handles the result from the Place Picker and Image Chooser.
+     */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK && data != null && data.data != null) {
@@ -116,6 +135,9 @@ class DoctorAddPatientActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Validates input fields, creates a new patient, and saves it to Firestore.
+     */
     private fun savePatient() {
         val firstName = addPatientName.text.toString().trim()
         val lastName = addPatientLastName.text.toString().trim()

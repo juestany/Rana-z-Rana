@@ -10,8 +10,19 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 
+/**
+ * NotificationReceiver is a BroadcastReceiver that handles the display of notifications.
+ * It is triggered by a broadcast intent and shows a notification to the user.
+ */
 class NotificationReceiver : BroadcastReceiver() {
 
+    /**
+     * Called when the BroadcastReceiver receives a broadcast intent.
+     * Checks if the app has the necessary notification permissions and displays a notification.
+     *
+     * @param context The Context in which the receiver is running.
+     * @param intent The Intent received by the receiver.
+     */
     override fun onReceive(context: Context, intent: Intent) {
         Log.d("NotificationReceiver", "Próba wyświetlenia powiadomienia") // Dodanie logowania
 

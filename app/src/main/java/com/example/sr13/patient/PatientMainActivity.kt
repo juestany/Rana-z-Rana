@@ -70,6 +70,10 @@ class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
     private var doctorLocation: LatLng? = null
     private var patientAddress: String? = null
 
+    /**
+     * Initializes the activity, sets up Firebase, UI components, and map fragment.
+     * Also requests location updates and registers the device for notifications.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.patient_main)
@@ -126,7 +130,10 @@ class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
 
-
+    /**
+     * Sets up listeners for various buttons and user actions on the main screen.
+     * Includes functionality for submitting a report, logging out, and interacting with the map.
+     */
     private fun setupListeners() {
         patientSubmitReportBtn.setOnClickListener {
             startActivity(Intent(this, PatientAddReportActivity::class.java))
@@ -167,6 +174,10 @@ class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
         })
     }
 
+    /**
+     * Fetches and displays the patient's data from Firestore.
+     * Updates the UI with the patient's name, profile picture, and doctor's information.
+     */
     private fun getPatientData() {
         val userId = auth.currentUser?.uid ?: return
         firestore.collection("patient").document(userId).get().addOnSuccessListener { document ->
@@ -187,6 +198,10 @@ class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    /**
+     * Checks if a chat room exists between the patient and their doctor.
+     * Creates a new chat room if one does not exist.
+     */
     private fun checkIfChatRoomExists() {
         val chatsRef = firestore.collection("chats")
         val patientId = auth.currentUser?.uid
@@ -220,6 +235,11 @@ class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         }
     }
+
+    /**
+     * Fetches the doctor's name from Firestore based on the doctor ID.
+     * Calls the provided callback function with the doctor's full name.
+     */
     private fun fetchDoctorName(doctorId: String, callback: (String) -> Unit) {
         firestore.collection("doctor").document(doctorId).get().addOnSuccessListener { document ->
             val firstName = document.getString("firstName") ?: ""
@@ -231,6 +251,10 @@ class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    /**
+     * Creates a new chat room in Firestore with the given doctor and patient IDs.
+     * Opens the chat screen after successfully creating the chat room.
+     */
     private fun createChatRoom(doctorId: String, patientId: String) {
         val chatRoomData = hashMapOf(
             "participants" to listOf(doctorId, patientId),
@@ -247,6 +271,9 @@ class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    /**
+     * Opens the chat activity for the specified chat room ID and participant name.
+     */
     private fun openChat(chatRoomId: String, participantName: String) {
         val intent = Intent(this, ChatActivity::class.java).apply {
             putExtra("CHAT_ROOM_ID", chatRoomId)
@@ -255,7 +282,10 @@ class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
         startActivity(intent)
     }
 
-
+    /**
+     * Fetches the doctor's location from Firestore using their ID.
+     * Geocodes the doctor's address and stores the resulting LatLng for routing.
+     */
     private fun getDoctorLocation(doctorId: String) {
         firestore.collection("doctor").document(doctorId).get().addOnSuccessListener { document ->
             document?.getString("adress")?.let { address ->
@@ -264,6 +294,10 @@ class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    /**
+     * Geocodes the given address into a LatLng object using a Geocoder.
+     * Stores the resulting coordinates in the doctorLocation variable.
+     */
     private fun geocodeDoctorAddress(address: String) {
         CoroutineScope(Dispatchers.IO).launch {
             val geocoder = Geocoder(this@PatientMainActivity, Locale.getDefault())
@@ -275,7 +309,10 @@ class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
 
-
+    /**
+     * Calculates a route from the patient's current location to the doctor's location.
+     * Opens Google Maps with directions to the doctor's location.
+     */
     private fun calculateRouteToDoctor(currentLatLng: LatLng) {
         doctorLocation?.let {
             val uri = Uri.parse("https://www.google.com/maps/dir/?api=1&origin=${currentLatLng.latitude},${currentLatLng.longitude}&destination=${it.latitude},${it.longitude}&travelmode=driving")
@@ -284,6 +321,10 @@ class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    /**
+     * Geocodes the patient's address and calculates a route to the doctor's location.
+     * Uses a Geocoder to convert the address into coordinates.
+     */
     private fun geocodeAddressAndCalculateRoute(address: String) {
         CoroutineScope(Dispatchers.IO).launch {
             val geocoder = Geocoder(this@PatientMainActivity, Locale.getDefault())
@@ -294,6 +335,10 @@ class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    /**
+     * Finds nearby places of a specified type (e.g., pharmacy, hospital) within a given radius.
+     * Marks the found places on the Google Map using their coordinates.
+     */
     private fun findNearbyPlaces(type: String, radius: Int) {
         currentLocation?.let {
             val url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${it.latitude},${it.longitude}&radius=$radius&type=$type&key=AIzaSyCcRzRGfnozt57TuI03DIe_PyfqSfwjwrg"
@@ -316,11 +361,20 @@ class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    /**
+     * Called when the Google Map is ready to be used.
+     * Enables zoom controls on the map.
+     */
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         mMap.uiSettings.isZoomControlsEnabled = true
     }
 
+
+    /**
+     * Requests regular location updates from the device's location services.
+     * Updates the map with the patient's current location.
+     */
     private fun requestLocationUpdates() {
         val request = LocationRequest.create().apply {
             interval = 10000
@@ -347,6 +401,10 @@ class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
         fusedLocationClient.requestLocationUpdates(request, locationCallback, Looper.getMainLooper())
     }
 
+    /**
+     * Registers the device with Firebase for push notifications.
+     * Retrieves the device's FCM token and saves it to Firestore.
+     */
     private fun registerDeviceToken() {
         FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
             if (task.isSuccessful) {
@@ -360,6 +418,10 @@ class PatientMainActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
 
+    /**
+     * Saves the provided Firebase Cloud Messaging (FCM) token to Firestore.
+     * Associates the token with the current user's ID.
+     */
     private fun saveTokenToFirestore(token: String) {
         val userId = FirebaseAuth.getInstance().currentUser?.uid
         userId?.let {

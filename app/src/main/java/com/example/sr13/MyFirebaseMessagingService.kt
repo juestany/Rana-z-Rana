@@ -12,8 +12,19 @@ import com.example.sr13.patient.PatientMainActivity
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 
+/**
+ * This service handles incoming Firebase Cloud Messaging (FCM) messages.
+ * It processes received messages and displays notifications to the user.
+ */
 class MyFirebaseMessagingService : FirebaseMessagingService() {
 
+    /**
+     * Called when an FCM message is received.
+     * Logs the received data, extracts the sender's name and message content,
+     * and triggers a notification display.
+     *
+     * @param remoteMessage The message received from FCM, containing data and notification payloads.
+     */
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
 
@@ -28,6 +39,15 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     }
 
 
+
+    /**
+     * Displays a notification to the user.
+     * Constructs and sends a notification with the given title and body.
+     * Checks for notification permissions before displaying the notification.
+     *
+     * @param title The title of the notification.
+     * @param body The content text of the notification.
+     */
     private fun showNotification(title: String, body: String) {
         Log.d("FCM", "Wyświetlanie powiadomienia: Tytuł=$title, Treść=$body")
         val notificationId = System.currentTimeMillis().toInt()

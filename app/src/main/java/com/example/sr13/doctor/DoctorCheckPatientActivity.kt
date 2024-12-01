@@ -19,6 +19,10 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 
+/**
+ * Activity to manage a doctor's view and interactions with a specific patient's details and reports.
+ * Allows the doctor to view patient details, reports, chat with the patient, or remove the patient from their list.
+ */
 class DoctorCheckPatientActivity : AppCompatActivity() {
 
     private lateinit var removePatientBtn: Button
@@ -33,6 +37,9 @@ class DoctorCheckPatientActivity : AppCompatActivity() {
     private var patientId: String? = null
     private var doctorId: String? = null
 
+    /**
+     * Initializes the activity, sets up views, loads patient data and reports, and attaches click listeners.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.doctor_check_patient)
@@ -73,6 +80,10 @@ class DoctorCheckPatientActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Checks if a chat room already exists between the doctor and patient.
+     * If it exists, navigates to the chat room; otherwise, creates a new chat room.
+     */
     private fun checkIfChatRoomExists() {
         val chatsRef = FirebaseFirestore.getInstance().collection("chats")
         doctorId?.let { docId ->
@@ -101,6 +112,11 @@ class DoctorCheckPatientActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Loads the patient's name and creates a new chat room.
+     *
+     * @param patientId The ID of the patient.
+     */
     private fun loadPatientNameAndCreateChatRoom(patientId: String) {
         firestore.collection("patient")
             .document(patientId)
@@ -117,6 +133,11 @@ class DoctorCheckPatientActivity : AppCompatActivity() {
             }
     }
 
+    /**
+     * Loads the patient's name and navigates to an existing chat room.
+     *
+     * @param chatRoomId The ID of the chat room.
+     */
     private fun loadPatientNameAndOpenChat(chatRoomId: String) {
         patientId?.let { id ->
             firestore.collection("patient")
@@ -135,6 +156,13 @@ class DoctorCheckPatientActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Creates a new chat room in Firestore and navigates to it.
+     *
+     * @param doctorId The ID of the doctor.
+     * @param patientId The ID of the patient.
+     * @param participantName The name of the patient.
+     */
     private fun createChatRoom(doctorId: String, patientId: String, participantName: String) {
         val chatRoomData = hashMapOf(
             "participants" to listOf(doctorId, patientId),
@@ -150,6 +178,12 @@ class DoctorCheckPatientActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Opens the chat screen with the specified chat room ID and participant name.
+     *
+     * @param chatRoomId The ID of the chat room.
+     * @param participantName The name of the participant (patient).
+     */
     private fun openChat(chatRoomId: String, participantName: String) {
         val intent = Intent(this, ChatActivity::class.java)
         intent.putExtra("CHAT_ROOM_ID", chatRoomId) // Pass the chatRoomId to the ChatActivity
@@ -157,6 +191,11 @@ class DoctorCheckPatientActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
+    /**
+     * Loads the patient's basic data (e.g., name, profile picture) and displays it.
+     *
+     * @param patientId The ID of the patient.
+     */
     private fun loadPatientData(patientId: String) {
         firestore.collection("patient")
             .document(patientId)
@@ -179,12 +218,22 @@ class DoctorCheckPatientActivity : AppCompatActivity() {
             }
     }
 
+    /**
+     * Fetches the patient's profile picture from Firebase Storage and displays it.
+     *
+     * @param imageUrl The URL of the profile picture in Firebase Storage.
+     */
     private fun fetchImageFromFirebaseStorage(imageUrl: String) {
         Glide.with(this)
             .load(imageUrl)
             .into(patientProfilePic)
     }
 
+    /**
+     * Removes the patient document from Firestore and updates the doctor's patient list.
+     *
+     * @param patientId The ID of the patient to remove.
+     */
     private fun removePatientFromDatabase(patientId: String) {
         // Remove the patient document
         firestore.collection("patient")
@@ -199,6 +248,11 @@ class DoctorCheckPatientActivity : AppCompatActivity() {
             }
     }
 
+    /**
+     * Updates the doctor's patient list to remove the specified patient.
+     *
+     * @param patientId The ID of the patient to remove.
+     */
     private fun removePatientFromDoctor(patientId: String) {
         doctorId?.let { docId ->
             val doctorRef = firestore.collection("doctor").document(docId)
@@ -223,6 +277,12 @@ class DoctorCheckPatientActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Loads the patient's submitted reports and displays them in the RecyclerView.
+     * Reports are sorted by date in descending order.
+     *
+     * @param patientId The ID of the patient whose reports to load.
+     */
     private fun loadPatientReports(patientId: String) {
         firestore.collection("reports")
             .whereEqualTo("userId", patientId)
